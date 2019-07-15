@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!--  Meta  -->
+  <meta charset="UTF-8" />
+  <title>Holiday Weekday Visualizer</title>
+
+  <!--  Styles  -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="styles/index.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div id="checkboxes-area" class="col-3">
+<!--         <h3>Select Holidays to Show</h3> -->
+        <ul class="list-group">
+          <li class="list-group-item">
+            <input type="checkbox" id="chkbox_pesach" class="chkbox" value="Pesach" checked="true"> Pesach (Passover)
+          </li>
+          <li class="list-group-item">
+            <input type="checkbox" id="chkbox_shavuot" class="chkbox" value="Shavuot" checked="true"> Shavuot
+          </li>
+          <li class="list-group-item">
+            <input type="checkbox" id="chkbox_roshhashana" class="chkbox" value="Rosh Hashana" checked="true"> Rosh Hashana
+          </li>
+          <li class="list-group-item">
+            <input type="checkbox" id="chkbox_yomkippur" class="chkbox" value="Yom Kippur" checked="true"> Yom Kippur
+          </li>
+        </ul>
+      </div>
+
+      <div id="calendar-area" class="col-9"></div>
+    </div>
+  </div>
+  <!-- Scripts -->
+  <script src="https://d3js.org/d3.v4.min.js">
+  </script>
+  <script src="dist/restructure.js">
+  </script>
+  <script src="dist/dates.js">
+  </script>
+  <script src="dist/constants.js">
+  </script>
+  <script src="dist/utils.js">
+  </script>
+  <script src="dist/index.js">
+  </script>
+</body>
+
+</html>

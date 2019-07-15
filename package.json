@@ -1,0 +1,16 @@
+{
+  "name": "ytdays",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsc -p ./src && concurrently \"tsc -w -p ./src\""
+  },
+  "author": "Raphi Stein",
+  "license": "ISC",
+  "dependencies": {
+    "@types/d3": "^5.7.2",
+    "typescript": "^3.5.3"
+  }
+}
