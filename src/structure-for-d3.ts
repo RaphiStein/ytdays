@@ -1,4 +1,6 @@
-export function restructure (allYears: any[]) {
+import { IInputYear } from './types';
+
+export function restructure (allYears: IInputYear[]) {
     const newStructure: any[] = [];
 
     for (let i = 0; i < allYears.length; i++) {

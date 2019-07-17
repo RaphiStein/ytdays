@@ -1,21 +1,26 @@
 import { dates } from './dates';
 
 import * as d3 from 'd3';
-import { restructure } from './restructure';
+import { restructure } from './structure-for-d3';
 import { constants, daysOfWeek } from './constants';
 import { calculateNumberOfRows } from './utils';
+import { structureByYear } from './structure-by-year';
+import { IHebcalYearRaw, IInputYear } from './types';
 
 let activeData: any[] = [];
 let originalData = restructure(dates);
 activeData = originalData;
 
 
-/*var xmlHttp = new XMLHttpRequest();
+var xmlHttp = new XMLHttpRequest();
 xmlHttp.open( "GET", 'https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=2023&month=x&mf=off&c=off&m=50', false ); // false for synchronous request
 xmlHttp.send( null );
-let originalData = JSON.parse(xmlHttp.responseText).items;
-activeData = originalData;*/
+let parsedResponse = <IHebcalYearRaw>JSON.parse(xmlHttp.responseText);
+//let originalData = parsedResponse.items;
+//activeData = originalData;
 
+/*const structuredByYear: IInputYear[] = [structureByYear(parsedResponse)];
+activeData = restructure(structuredByYear);*/
 
 console.log("Starting script..");
 
