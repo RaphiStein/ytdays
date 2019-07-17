@@ -11,6 +11,11 @@
   "license": "ISC",
   "dependencies": {
     "@types/d3": "^5.7.2",
-    "typescript": "^3.5.3"
+    "d3": "^5.9.7",
+    "typescript": "^3.5.3",
+    "webpack": "^4.36.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "devDependencies": {
   }
 }
