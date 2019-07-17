@@ -5,17 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc -p ./src && concurrently \"tsc -w -p ./src\""
+    "//dev": "tsc -p ./src && concurrently \"tsc -w -p ./src\"",
+    "dev": "webpack-cli --mode=development --watch ",
+    "build": "webpack-cli"
   },
   "author": "Raphi Stein",
   "license": "ISC",
   "dependencies": {
     "@types/d3": "^5.7.2",
     "d3": "^5.9.7",
-    "typescript": "^3.5.3",
-    "webpack": "^4.36.1",
-    "webpack-cli": "^3.3.6"
+    "typescript": "^3.5.3"
   },
   "devDependencies": {
+    "webpack": "^4.36.1",
+    "webpack-cli": "^3.3.6",
+    "ts-loader": "^6.0.4"
   }
 }
