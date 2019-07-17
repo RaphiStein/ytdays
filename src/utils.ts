@@ -1,4 +1,6 @@
-function calculateNumberOfRows(arrayOfDays: any[]) {
+import { daysOfWeek } from './constants';
+
+export function calculateNumberOfRows(arrayOfDays: any[]) {
     //console.log('arrayOfDays', arrayOfDays);
     if (arrayOfDays.length === 0) return 0;
     if (arrayOfDays.length === 1) return 1;

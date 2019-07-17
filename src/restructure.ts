@@ -1,4 +1,4 @@
-var restructure = function (allYears: any[]) {
+export function restructure (allYears: any[]) {
     const newStructure: any[] = [];
 
     for (let i = 0; i < allYears.length; i++) {

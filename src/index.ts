@@ -1,3 +1,10 @@
+import { dates } from './dates';
+
+import * as d3 from 'd3';
+import { restructure } from './restructure';
+import { constants, daysOfWeek } from './constants';
+import { calculateNumberOfRows } from './utils';
+
 let activeData: any[] = [];
 let originalData = restructure(dates);
 activeData = originalData;
@@ -16,7 +23,7 @@ let filterOutHolidays: string[] = [];
 
 d3.selectAll(".chkbox").on("change", filterHolidays);
 function filterHolidays(event: any) {
-    var newData;
+    var newData: any[];
     var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)" );
     filterOutHolidays = [];
     for (var i = 0; i < checkboxes.length; i++) {
@@ -41,7 +48,7 @@ function filterHolidays(event: any) {
 var x = d3
   .scaleBand()
   .domain(daysOfWeek.concat(" "))
-  .range([0, width]);
+  .range([0, constants.width]);
 
 const dayWidth = x.bandwidth();
 
@@ -64,11 +71,11 @@ let div = d3
 let svg = d3
     .select("#calendar-area")
     .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("width", constants.width + constants.margin.left + constants.margin.right)
+    .attr("height", constants.height + constants.margin.top + constants.margin.bottom)
     .append("g")
     .attr("id", "container")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + constants.margin.left + "," + constants.margin.top + ")");
 
   // svg
   //   .append('g')
@@ -124,11 +131,11 @@ let svg = d3
     .append("g")
     .attr("year-height", (d, i, j) => {
       //var yearHeight = i===0? 0 : calculateNumberOfRows(j[i].__data__)*rowHeight;
-      var yearHeight = calculateNumberOfRows(d) * rowHeight;
+      var yearHeight = calculateNumberOfRows(d) * constants.rowHeight;
       return yearHeight;
     })
     .attr("transform", (d, i, j) => {
-      var totalOffset = interyearMargin; // first year should be offset by 20
+      var totalOffset = constants.interyearMargin; // first year should be offset by 20
       if (i > 0) {
         var heightOfPreviousYear = parseInt(
           d3.select(j[i - 1]).attr("year-height")
@@ -140,7 +147,7 @@ let svg = d3
             .split(",")[1]
         );
         totalOffset =
-          heightOfPreviousYear + offsetOfPreviousYear + interyearMargin;
+          heightOfPreviousYear + offsetOfPreviousYear + constants.interyearMargin;
       }
       return "translate(0," + totalOffset + ")";
     })
@@ -193,13 +200,13 @@ let svg = d3
     .attr("x", (dayObj: any) => {
       return daysOfWeek.indexOf(dayObj.day) * dayWidth;
     })
-    .attr("y", (d, i, j) => {
-      return j[i].attributes["row-number-wrt-year"].value * rowHeight;
+    .attr("y", (d, i, j: any) => {
+      return j[i].attributes["row-number-wrt-year"].value * constants.rowHeight;
     })
     // END ANIMATION
     .attr("width", i => dayWidth)
     .attr("height", 20)
-    .style("fill", (dayObj: any) => colors[dayObj.yomTov] || "#222")
+    .style("fill", (dayObj: any) => constants.colors[dayObj.yomTov] || "#222")
     // TOOLTIP START
     .on("mouseover", function(d: any) {
       let tooltipString = d.yomTov;
@@ -245,8 +252,8 @@ const bars = yomTovObjects.selectAll()
     .append("text")
     .attr("x", "-40")
     .attr("y", d => {
-      var numberOfRows = calculateNumberOfRows(d);
-      return numberOfRows * rowHeight / 2;
+      var numberOfRows = calculateNumberOfRows( d);
+      return numberOfRows * constants.rowHeight / 2;
     })
     /*.attr('transform', (d) => {
     var numberOfRows = calculateNumberOfRows(d);

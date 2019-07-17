@@ -1,15 +1,32 @@
 // set the dimensions and margins of the graph
-var margin = { top: 20, right: 20, bottom: 30, left: 80 };
-var width = 960 - margin.left - margin.right;
-var height = 500 - margin.top - margin.bottom;
 
-let saturdayFlag = false;
-const rowHeight = 25;
-const interyearMargin = 20;
-let calendarHeight = 200;
-let currentRow = -1;
+const MARGIN = { top: 20, right: 20, bottom: 30, left: 80 };
 
-const daysOfWeek = [
+export const constants:any = {
+  margin: MARGIN,
+  width: 960 - MARGIN.left - MARGIN.right,
+  height: 500 - MARGIN.top - MARGIN.bottom,
+  rowHeight: 25,
+  interyearMargin: 20,
+  colors: {
+    Pesach: "#1E90FF",
+    Shavuot: "#7CF000",
+    //"Shavuot": "#FFD700",
+    "Rosh Hashana": "#D3143C",
+    "Yom Kippur": "#8B0000",
+    Sukkot: "#FFFF00"
+  }
+}
+
+
+export let globals = {
+  saturdayFlag: false,
+  calendarHeight: 200,
+  currentRow: -1
+}
+
+
+export const daysOfWeek = [
   "Sunday",
   "Monday",
   "Tuesday",
@@ -18,11 +35,3 @@ const daysOfWeek = [
   "Friday",
   "Saturday"
 ];
-const colors: any = {
-  Pesach: "#1E90FF",
-  Shavuot: "#7CF000",
-  //"Shavuot": "#FFD700",
-  "Rosh Hashana": "#D3143C",
-  "Yom Kippur": "#8B0000",
-  Sukkot: "#FFFF00"
-};

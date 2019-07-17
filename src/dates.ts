@@ -1,8 +1,10 @@
+import { IInputYear, Day } from './types';
+
 /** Hebcal API: https://www.hebcal.com/home/195/jewish-calendar-rest-api */
 
 
 
-var dates = [
+export const dates: IInputYear[] = [
     {
       year: "2018",
       sets: [
@@ -11,15 +13,15 @@ var dates = [
           setItems: [
             {
               name: "Pesach - Part I",
-              days: ["Saturday", "Sunday"]
+              days: [Day.Saturday, Day.Sunday]
             },
             {
               name: "Chol Hamoed Pesach",
-              days: ["Monday", "Tuesday", "Wednesday", "Thursday"]
+              days: [Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday]
             },
             {
               name: "Pesach - Part II",
-              days: ["Friday", "Saturday"]
+              days: [Day.Friday, Day.Saturday]
             }
           ]
         },
@@ -28,7 +30,7 @@ var dates = [
           setItems: [
             {
               name: "Shavuot",
-              days: ["Sunday", "Monday"]
+              days: [Day.Sunday, Day.Monday]
             }
           ]
         },
@@ -37,7 +39,7 @@ var dates = [
           setItems: [
             {
               name: "Rosh Hashana",
-              days: ["Monday", "Tuesday"]
+              days: [Day.Monday, Day.Tuesday]
             }
           ]
         },
@@ -46,7 +48,7 @@ var dates = [
           setItems: [
             {
               name: "Yom Kippur",
-              days: ["Wednesday"]
+              days: [Day.Wednesday]
             }
           ]
         },
@@ -55,19 +57,19 @@ var dates = [
           setItems: [
             {
               name: "Sukkot",
-              days: ["Monday", "Tuesday"]
+              days: [Day.Monday, Day.Tuesday]
             },
             {
               name: "Chol Hamoed Sukkot",
-              days: ["Wednesday", "Thursday", "Friday", "Saturday"]
+              days: [Day.Wednesday, Day.Thursday, Day.Friday, Day.Saturday]
             },
             {
               name: "Hoshana Rabba",
-              days: ["Sunday"]
+              days: [Day.Sunday]
             },
             {
               name: "Shemi Atzeret",
-              days: ["Monday", "Tuesday"]
+              days: [Day.Monday, Day.Tuesday]
             }
           ]
         }
@@ -81,15 +83,15 @@ var dates = [
           setItems: [
             {
               name: "Pesach - Part I",
-              days: ["Saturday", "Sunday"]
+              days: [Day.Saturday, Day.Sunday]
             },
             {
               name: "Chol Hamoed Pesach",
-              days: ["Monday", "Tuesday", "Wednesday", "Thursday"]
+              days: [Day.Monday, Day.Tuesday, Day.Wednesday, Day.Thursday]
             },
             {
               name: "Pesach - Part II",
-              days: ["Friday", "Saturday"]
+              days: [Day.Friday, Day.Saturday]
             }
           ]
         },
@@ -98,7 +100,7 @@ var dates = [
           setItems: [
             {
               name: "Rosh Hashana",
-              days: ["Monday", "Tuesday"]
+              days: [Day.Monday, Day.Tuesday]
             }
           ]
         },
@@ -107,7 +109,7 @@ var dates = [
           setItems: [
             {
               name: "Yom Kippur",
-              days: ["Wednesday"]
+              days: [ Day.Wednesday ]
             }
           ]
         }
@@ -121,7 +123,7 @@ var dates = [
           setItems: [
             {
               name: "Rosh Hashana",
-              days: ["Saturday", "Sunday"]
+              days: [Day.Saturday, Day.Sunday]
             }
           ]
         },
@@ -130,7 +132,7 @@ var dates = [
           setItems: [
             {
               name: "Yom Kippur",
-              days: ["Monday"]
+              days: [Day.Monday]
             }
           ]
         }
@@ -144,7 +146,7 @@ var dates = [
           setItems: [
             {
               name: "Rosh Hashana",
-              days: ["Tuesday", "Wednesday"]
+              days: [Day.Tuesday, Day.Wednesday]
             }
           ]
         },
@@ -153,7 +155,7 @@ var dates = [
           setItems: [
             {
               name: "Yom Kippur",
-              days: ["Thursday"]
+              days: [Day.Thursday]
             }
           ]
         }
