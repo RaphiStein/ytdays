@@ -13,17 +13,6 @@ export interface IInputSetItem {
     days: Day[]
 }
 
-export enum Day {
-    Saturday = "Saturday",
-    Sunday = "Sunday",
-    Monday = "Monday",
-    Tuesday = "Tuesday",
-    Wednesday = "Wednesday",
-    Thursday = "Thursday",
-    Friday = "Friday"
-}
-
-
 export interface IHebcalYearRaw {
     link: string; // link to API url that was fetched to get this result
     location: { geo: string};
@@ -42,4 +31,41 @@ export interface IHebcalYearItem {
     subcat: string; // "major",
     memo: string; // "Purim is one of the most joyous and fun holidays on the Jewish calendar"
     yomtov?: boolean;
+}
+
+/** Block = a single day and and all the data that goes with it */
+export interface IStructuredD3Block {
+    year: string;
+    yomTov: string;
+    yomTovIndex: number;
+    yomTovColor: string;
+    subYomTov: string;
+    subYomTovIndex: number,
+    day: Day
+}
+
+//////////////////////////////////////
+//    ENUMS
+//////////////////////////////////////
+
+export enum Day {
+    Saturday = "Saturday",
+    Sunday = "Sunday",
+    Monday = "Monday",
+    Tuesday = "Tuesday",
+    Wednesday = "Wednesday",
+    Thursday = "Thursday",
+    Friday = "Friday"
+}
+
+export enum YomTov {
+    Purim = 'Purim',
+    Pesach = 'Pesach',
+    Shavuot = 'Shavuot',
+    TishaBav = 'Tisha B\'av',
+    RoshHashana = 'Rosh Hashana',
+    YomKippur = 'Yom Kippur',
+    Sukkot = 'Sukkot',
+    SheminiAtzeret = 'SheminiAtzeret',
+    Chanukah = 'Chanukah'
 }
