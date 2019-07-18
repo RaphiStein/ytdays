@@ -1,4 +1,5 @@
 import { daysOfWeek } from './constants';
+import { Day } from './types';
 
 export function calculateNumberOfRows(arrayOfDays: any[]) {
     //console.log('arrayOfDays', arrayOfDays);
@@ -13,4 +14,29 @@ export function calculateNumberOfRows(arrayOfDays: any[]) {
       }
     }
     return numberOfRows;
+  }
+
+  /** Expects format YYY-MM-dd */
+  export function dateToDayOfWeek(date: string): Day {
+    const dateStrSplit = date.split('-');
+    const newDate = new Date(parseInt(dateStrSplit[0]), parseInt(dateStrSplit[1])-1, parseInt(dateStrSplit[2]) );
+    const day = newDate.getDay();
+    switch(day){
+      case 0:
+        return Day.Sunday;
+      case 1:
+        return Day.Monday;
+      case 2:
+        return Day.Tuesday;
+      case 3:
+        return Day.Wednesday;
+      case 4:
+        return Day.Thursday
+      case 5:
+        return Day.Friday
+      case 6:
+        return Day.Saturday
+      default:
+        throw "Something wrong with date provided!"
+    }
   }
