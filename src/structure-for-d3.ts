@@ -1,11 +1,11 @@
-import { IInputYear } from './types';
+import { IInputYear, IStructuredD3Block } from './types';
 
-export function restructure (allYears: IInputYear[]) {
-    const newStructure: any[] = [];
+export function restructure (allYears: IInputYear[]): IStructuredD3Block[][] {
+    const blocksGroupedByYear: IStructuredD3Block[][] = [];
 
     for (let i = 0; i < allYears.length; i++) {
       const currentYear = allYears[i]['year'];
-      let allDaysInCurrentYear: any = [];
+      let allBlocksInCurrentYear: IStructuredD3Block[] = [];
 
       for (let j = 0; j < allYears[i]['sets'].length; j++){
         const setName = allYears[i]['sets'][j]['setName'];
@@ -15,7 +15,7 @@ export function restructure (allYears: IInputYear[]) {
           //console.log(allYears[i]['sets'][j]['setItems'][k]);
 
           for (let m = 0; m < allYears[i]['sets'][j]['setItems'][k]['days'].length; m++){
-            let newObj = {
+            let block: IStructuredD3Block = {
               year: currentYear,
               yomTov: setName,
               yomTovIndex: j,
@@ -24,14 +24,14 @@ export function restructure (allYears: IInputYear[]) {
               subYomTovIndex: k,
               day: allYears[i]['sets'][j]['setItems'][k].days[m]
             }
-            allDaysInCurrentYear.push(newObj);
+            allBlocksInCurrentYear.push(block);
           }
         }
       }
-      newStructure.push(allDaysInCurrentYear);
+      blocksGroupedByYear.push(allBlocksInCurrentYear);
     }
-    //console.log('newStructure', newStructure);
-    return newStructure;
+    console.log('blocksGroupedByYear', blocksGroupedByYear);
+    return blocksGroupedByYear;
   }
 
 
