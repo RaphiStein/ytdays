@@ -4,20 +4,26 @@ import * as d3 from 'd3';
 import { restructure } from './structure-for-d3';
 import { constants, daysOfWeek } from './constants';
 import { calculateNumberOfRows } from './utils';
-import { structureByYear } from './structure-by-year';
+import { structureFromHebcal } from './structure-from-hebcal';
 import { IHebcalYearRaw, IInputYear } from './types';
 
+let originalData
 let activeData: any[] = [];
-let originalData = restructure(dates);
+
+originalData = restructure(dates);
 activeData = originalData;
 
 
 var xmlHttp = new XMLHttpRequest();
-xmlHttp.open( "GET", 'https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=2023&month=x&mf=off&c=off&m=50', false ); // false for synchronous request
+xmlHttp.open( "GET", 'https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=2019&month=x&mf=off&c=off&m=50', false ); // false for synchronous request
 xmlHttp.send( null );
 let parsedResponse = <IHebcalYearRaw>JSON.parse(xmlHttp.responseText);
-//let originalData = parsedResponse.items;
-//activeData = originalData;
+
+const structuredByYear = structureFromHebcal(parsedResponse);
+console.log("structuredByYear", structuredByYear);
+originalData =  restructure([structuredByYear]);
+console.log("Original Data", originalData);
+activeData = originalData;
 
 /*const structuredByYear: IInputYear[] = [structureByYear(parsedResponse)];
 activeData = restructure(structuredByYear);*/
@@ -128,7 +134,7 @@ let svg = d3
 
   const yearGroup = svg
     .selectAll(".year-group")
-    .data(activeData, (d:any) => {
+    .data(activeData, (d: any) => {
       console.log("d", d[0].year);
       return d ? d[0].year : 0;
     }) // key is the year

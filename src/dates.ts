@@ -2,8 +2,6 @@ import { IInputYear, Day } from './types';
 
 /** Hebcal API: https://www.hebcal.com/home/195/jewish-calendar-rest-api */
 
-
-
 export const dates: IInputYear[] = [
     {
       year: "2018",
