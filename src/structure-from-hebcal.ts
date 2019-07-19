@@ -21,10 +21,13 @@ export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
     for (let s of mappedToArray) {
         const setItems: IInputSetItem[] = [];
         for (const hebCalYearItem of s){
-           setItems.push( {
+
+            if (hebCalYearItem.title.match(/^Erev.*/)) continue;
+
+            setItems.push( {
                 name: convertHebcalMemoToYomTovName(hebCalYearItem.memo),
                 days: [dateToDayOfWeek(hebCalYearItem.date)]
-           })
+            })
         }
 
         sets.push({

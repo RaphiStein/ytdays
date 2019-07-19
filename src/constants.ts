@@ -9,12 +9,15 @@ export const constants:any = {
   rowHeight: 25,
   interyearMargin: 20,
   colors: {
-    Pesach: "#1E90FF",
-    Shavuot: "#7CF000",
-    //"Shavuot": "#FFD700",
     "Rosh Hashana": "#D3143C",
     "Yom Kippur": "#8B0000",
-    Sukkot: "#FFFF00"
+    Sukkot: "#287d35",
+    SheminiAtzeret: "#219c33",
+    Chanukah: "#1E90FF",
+    Purim: "#ecff73",
+    Pesach: "#CAE5E8",
+    Shavuot: "#7CF000",
+    //"Shavuot": "#FFD700",
   }
 }
 
