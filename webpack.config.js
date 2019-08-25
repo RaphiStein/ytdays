@@ -4,6 +4,7 @@ module.exports = {
     entry: './src/index',
     //entry: './dist/index',
     mode: 'development',
+    devtool: "inline-source-map",
     module: {
         rules: [
             {
