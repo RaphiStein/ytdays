@@ -6,6 +6,7 @@ import { constants, daysOfWeek } from './constants';
 import { calculateNumberOfRows } from './utils';
 import { structureFromHebcal } from './structure-from-hebcal';
 import { IHebcalYearRaw, IInputYear, IStructuredD3Block } from './types';
+import { hebcal_data } from './hebcal-data';
 
 let originalData
 let activeData: any[] = [];
@@ -13,15 +14,18 @@ let activeData: any[] = [];
 originalData = restructure(dates);
 activeData = originalData;
 
+// LOAD DATA FROM HEBCAL
+// var xmlHttp = new XMLHttpRequest();
+// xmlHttp.open( "GET", 'https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=2019&month=x&mf=off&c=off&m=50', false ); // false for synchronous request
+// xmlHttp.send( null );
+//let hebcalDataProcessed = <IHebcalYearRaw>JSON.parse(xmlHttp.responseText);
 
-var xmlHttp = new XMLHttpRequest();
-xmlHttp.open( "GET", 'https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on&min=off&mod=off&nx=off&year=2019&month=x&mf=off&c=off&m=50', false ); // false for synchronous request
-xmlHttp.send( null );
-let parsedResponse = <IHebcalYearRaw>JSON.parse(xmlHttp.responseText);
-
-const structuredByYear = structureFromHebcal(parsedResponse);
-console.log("structuredByYear", structuredByYear);
-originalData =  restructure([structuredByYear]);
+let hebcalDataProcessed = hebcal_data;
+const structuredYears: IInputYear[] = [];
+hebcalDataProcessed.forEach( (hebcalYear) => structuredYears.push(structureFromHebcal(hebcalYear)) )
+//const structuredByYear = structureFromHebcal(hebcalDataProcessed);
+//console.log("structuredByYear", structuredByYear);
+originalData =  restructure(structuredYears);
 console.log("Original Data", originalData);
 activeData = originalData;
 

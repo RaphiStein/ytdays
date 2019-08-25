@@ -1,7 +1,7 @@
 import { IHebcalYearRaw, IInputYear, IInputSetItem, IInputSet, IHebcalYearItem, YomTov } from './types';
 import { dateToDayOfWeek } from './utils';
 
-/** Converts HebCal structure to IInputYear[] */
+/** Converts HebCal structure to IInputYear for a single year */
 
 export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
 
