@@ -5,7 +5,7 @@ import { restructure } from './structure-for-d3';
 import { constants, daysOfWeek } from './constants';
 import { calculateNumberOfRows } from './utils';
 import { structureFromHebcal } from './structure-from-hebcal';
-import { IHebcalYearRaw, IInputYear } from './types';
+import { IHebcalYearRaw, IInputYear, IStructuredD3Block } from './types';
 
 let originalData
 let activeData: any[] = [];
@@ -25,6 +25,13 @@ originalData =  restructure([structuredByYear]);
 console.log("Original Data", originalData);
 activeData = originalData;
 
+
+const AVAILABLE_YOM_TOVS: string[] = Array.from(
+  new Set(
+    activeData[0].map( (block: IStructuredD3Block) => block.subYomTov ) // just take the 0 year. All years [should] have same Yom Tovs
+  )
+);
+
 /*const structuredByYear: IInputYear[] = [structureByYear(parsedResponse)];
 activeData = restructure(structuredByYear);*/
 
@@ -33,27 +40,54 @@ console.log("Starting script..");
 let filterOutHolidays: string[] = [];
 
 d3.selectAll(".chkbox").on("change", filterHolidays);
+
 function filterHolidays(event: any) {
-    var newData: any[];
-    var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)" );
-    filterOutHolidays = [];
-    for (var i = 0; i < checkboxes.length; i++) {
+  console.log("[filterOutHolidays]...");
+  var newData: any[];
+  var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)" );
+  filterOutHolidays = [];
+  for (var i = 0; i < checkboxes.length; i++) {
     filterOutHolidays.push(checkboxes[i].value);
     console.log("filterOutHolidays", filterOutHolidays);
-    }
-    newData = [];
-    for (var d1 = 0; d1 < originalData.length; d1++) {
-    newData[d1] = [];
-    for (var d2 = 0; d2 < originalData[d1].length; d2++) {
-        if (filterOutHolidays.indexOf(originalData[d1][d2].yomTov) === -1) {
-        newData[d1].push(originalData[d1][d2]);
-        // originalData[d1][d2]['hide'] = true;
-        }
-    }
-    }
-    activeData = newData;
-    draw();
+  }
+  newData = [];
+  for (var d1 = 0; d1 < originalData.length; d1++) {
+  newData[d1] = [];
+  for (var d2 = 0; d2 < originalData[d1].length; d2++) {
+      if (filterOutHolidays.indexOf(originalData[d1][d2].yomTov) === -1) {
+      newData[d1].push(originalData[d1][d2]);
+      // originalData[d1][d2]['hide'] = true;
+      }
+  }
+  }
+  activeData = newData;
+  draw();
+  return true;
+} 
+
+const minifyYTName = (name: string) => {
+  return name.replace(' ', '').toLowerCase();
 }
+
+let checkBoxArea = d3
+  .select("#new-checkboxes-area > .list-group")
+  .selectAll("input")
+  .data(AVAILABLE_YOM_TOVS)
+  .enter()
+  .append('li')
+    .attr("class", "list-group-item")
+  .append('label')
+    .attr('for', (d, i) => 'chkbox_' + minifyYTName(d) )
+    .text( (d: string) => { return d; } )
+  .append("input")
+    .attr("class", "chkbox ml-2")
+    .attr("value", (d: string) => { return d; } )
+    .attr("id", (d, i) => 'chkbox_' + minifyYTName(d) )
+    .attr("type", "checkbox")
+    .attr("checked", "true");
+    //.attr("onClick", "filterHolidays");
+
+d3.selectAll(".chkbox").on("change", filterHolidays);
 
 // set the ranges
 var x = d3
@@ -115,6 +149,7 @@ let svg = d3
     .style("stroke-width", 2)
     .style("stroke", "#ddd");
 
+  const LEFT_MARGIN = 25;
   svg
     .selectAll(".text")
     .data(daysOfWeek)
@@ -123,8 +158,8 @@ let svg = d3
     .text(i => i)
     .attr("x", (i:any) => {
       const domainValue = x(i);
-      if (domainValue) return domainValue + 25;
-      return 25;
+      if (domainValue) return domainValue + LEFT_MARGIN;
+      return LEFT_MARGIN;
       //else throw Error('x(i) returned undefined!');
     } )
     .attr("class", "year-text")
@@ -261,7 +296,7 @@ const bars = yomTovObjects.selectAll()
 
   yearGroup
     .append("text")
-    .attr("x", "-40")
+    .attr("x", "-60")
     .attr("y", d => {
       var numberOfRows = calculateNumberOfRows( d);
       return numberOfRows * constants.rowHeight / 2;
