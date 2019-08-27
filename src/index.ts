@@ -141,19 +141,6 @@ function draw() {
   //   .style("stroke", "#222")
   //   .style("fill", "none");
 
-  svg
-    .append("g")
-    .selectAll(".day-lines")
-    .data(daysOfWeek)
-    .enter()
-    .append("line")
-    .attr("x1", (d, i) => i * dayWidth)
-    .attr("y1", 0)
-    .attr("x2", (d, i) => i * dayWidth)
-    .attr("y2", 500)
-    .style("stroke-width", 2)
-    .style("stroke", "#ddd");
-
   // Days of the week column headers
   const LEFT_MARGIN = 25;
   svg
@@ -317,10 +304,24 @@ const bars = yomTovObjects.selectAll()
 
 
   // Recalculate the height of visualizer area
-  svg_main.attr("height",
-    (totalNumberOfRows * constants.rowHeight) + // all the rows
+  const calculatedFinalHeight = (totalNumberOfRows * constants.rowHeight) + // all the rows
     ((originalData.length - 1) * constants.interyearMargin) + // all the spaces between the rows
-    constants.margin.bottom * 2);
+    constants.margin.bottom * 2
+  svg_main.attr("height", calculatedFinalHeight);
+
+  // Draw the day swimlanes
+  svg
+    .append("g")
+    .selectAll(".day-lines")
+    .data(daysOfWeek)
+    .enter()
+    .append("line")
+    .attr("x1", (d, i) => i * dayWidth)
+    .attr("y1", 0)
+    .attr("x2", (d, i) => i * dayWidth)
+    .attr("y2", calculatedFinalHeight)
+    .style("stroke-width", 2)
+    .style("stroke", "#ddd");
 }
 
 filterHolidays();
