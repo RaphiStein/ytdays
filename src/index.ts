@@ -2,7 +2,7 @@ import { dates } from './dates';
 
 import * as d3 from 'd3';
 import { restructure } from './structure-for-d3';
-import { constants, daysOfWeek } from './constants';
+import { constants, daysOfWeek, defaultCheckedYomTovs } from './constants';
 import { calculateNumberOfRows, minifyYTName } from './utils';
 import { structureFromHebcal } from './structure-from-hebcal';
 import { IInputYear, IStructuredD3Block } from './types';
@@ -45,7 +45,7 @@ let filterOutHolidays: string[] = [];
 
 d3.selectAll(".chkbox").on("change", filterHolidays);
 
-function filterHolidays(event: any) {
+function filterHolidays() {
   console.log("[filterOutHolidays]...");
   var newData: any[];
   var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)" );
@@ -86,9 +86,13 @@ let checkBoxArea = d3
     .attr("value", (d: string) => { return d; } )
     .attr("id", (d, i) => 'chkbox_' + minifyYTName(d) )
     .attr("type", "checkbox")
-    .attr("checked", "true");
-    //.attr("onClick", "filterHolidays");
-d3.selectAll(".chkbox").on("change", filterHolidays);
+    .attr("checked", (ytName) => {
+      console.log('defaultCheckedYomTovs.indexOf(ytName)', ytName, defaultCheckedYomTovs.indexOf(ytName));
+      return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+      // return null;
+    });
+  
+  d3.selectAll(".chkbox").on("change", filterHolidays);
 
 
 // set the ranges
@@ -324,4 +328,5 @@ const bars = yomTovObjects.selectAll()
     constants.margin.bottom*2 );
 }
 
+filterHolidays();
 draw();

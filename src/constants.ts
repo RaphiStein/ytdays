@@ -21,6 +21,8 @@ export const constants:any = {
   }
 }
 
+/** These Yom Tovs are the ones checked by default on load */
+export const defaultCheckedYomTovs = ['Rosh Hashana', 'Yom Kippur'];
 
 export let globals = {
   saturdayFlag: false,
