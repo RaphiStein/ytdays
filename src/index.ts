@@ -3,9 +3,9 @@ import { dates } from './dates';
 import * as d3 from 'd3';
 import { restructure } from './structure-for-d3';
 import { constants, daysOfWeek } from './constants';
-import { calculateNumberOfRows } from './utils';
+import { calculateNumberOfRows, minifyYTName } from './utils';
 import { structureFromHebcal } from './structure-from-hebcal';
-import { IHebcalYearRaw, IInputYear, IStructuredD3Block } from './types';
+import { IInputYear, IStructuredD3Block } from './types';
 import { hebcal_data } from './hebcal-data';
 
 let originalData
@@ -69,10 +69,8 @@ function filterHolidays(event: any) {
   return true;
 } 
 
-const minifyYTName = (name: string) => {
-  return name.replace(' ', '').toLowerCase();
-}
 
+// Checkboxes
 let checkBoxArea = d3
   .select("#new-checkboxes-area > .list-group")
   .selectAll("input")
@@ -90,8 +88,8 @@ let checkBoxArea = d3
     .attr("type", "checkbox")
     .attr("checked", "true");
     //.attr("onClick", "filterHolidays");
-
 d3.selectAll(".chkbox").on("change", filterHolidays);
+
 
 // set the ranges
 var x = d3
@@ -117,9 +115,12 @@ let div = d3
   .attr("class", "tooltip")
   .style("opacity", 0);
 
-let svg = d3
+let svg_main = d3
     .select("#calendar-area")
-    .append("svg")
+    .append("svg");
+
+let svg = svg_main
+    .attr("width", constants.width + constants.margin.left + constants.margin.right)
     .attr("width", constants.width + constants.margin.left + constants.margin.right)
     .attr("height", constants.height + constants.margin.top + constants.margin.bottom)
     .append("g")
@@ -153,6 +154,7 @@ let svg = d3
     .style("stroke-width", 2)
     .style("stroke", "#ddd");
 
+  // Days of the week column headers
   const LEFT_MARGIN = 25;
   svg
     .selectAll(".text")
@@ -240,13 +242,13 @@ let svg = d3
     })
     // ANIMATION START
     /*.attr("x", dayObj => {
-    return (daysOfWeek.indexOf(dayObj.day) * dayWidth);
-  })
-  .attr("y", (d, i, j) => {
-    return j[i].attributes['row-number-wrt-year'].value * rowHeight;
-  })
-  .transition()
-  .duration(500)*/
+      return (daysOfWeek.indexOf(dayObj.day) * dayWidth);
+    })
+    .attr("y", (d, i, j) => {
+      return j[i].attributes['row-number-wrt-year'].value * rowHeight;
+    })
+    .transition()
+    .duration(500)*/
     .attr("x", (dayObj: any) => {
       return daysOfWeek.indexOf(dayObj.day) * dayWidth;
     })
@@ -298,18 +300,28 @@ const bars = yomTovObjects.selectAll()
   .style('fill', (i) => '#123' ); // colors[i.yomTov]);
 */
 
+  let totalNumberOfRows = 0;
+
   yearGroup
     .append("text")
     .attr("x", "-60")
     .attr("y", d => {
-      var numberOfRows = calculateNumberOfRows( d);
+      var numberOfRows = calculateNumberOfRows(d);
+      totalNumberOfRows += numberOfRows;
       return numberOfRows * constants.rowHeight / 2;
     })
     /*.attr('transform', (d) => {
-    var numberOfRows = calculateNumberOfRows(d);
-    return `translate(-40, ${numberOfRows*rowHeight})`
-  })*/
+      var numberOfRows = calculateNumberOfRows(d);
+      return `translate(-40, ${numberOfRows*rowHeight})`
+    })*/
     .text(d => d[0].year);
+
+
+  // Recalculate the height of visualizer area
+  svg_main.attr("height", 
+    (totalNumberOfRows * constants.rowHeight) + // all the rows
+    ((originalData.length-1 ) * constants.interyearMargin)  + // all the spaces between the rows
+    constants.margin.bottom*2 );
 }
 
 draw();

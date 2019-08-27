@@ -40,3 +40,11 @@ export function calculateNumberOfRows(arrayOfDays: any[]) {
         throw "Something wrong with date provided!"
     }
   }
+
+  /**
+   * e.g. Rosh Hashana -> roshhashana
+   * @param name 
+   */
+  export const minifyYTName = (name: string) => {
+    return name.replace(' ', '').toLowerCase();
+  }
