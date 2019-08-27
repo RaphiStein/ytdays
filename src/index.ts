@@ -22,17 +22,17 @@ activeData = originalData;
 
 let hebcalDataProcessed = hebcal_data;
 const structuredYears: IInputYear[] = [];
-hebcalDataProcessed.forEach( (hebcalYear) => structuredYears.push(structureFromHebcal(hebcalYear)) )
+hebcalDataProcessed.forEach((hebcalYear) => structuredYears.push(structureFromHebcal(hebcalYear)))
 //const structuredByYear = structureFromHebcal(hebcalDataProcessed);
 //console.log("structuredByYear", structuredByYear);
-originalData =  restructure(structuredYears);
-console.log("Original Data", originalData);
+originalData = restructure(structuredYears);
+//console.log("Original Data", originalData);
 activeData = originalData;
 
 
 const AVAILABLE_YOM_TOVS: string[] = Array.from(
   new Set(
-    activeData[0].map( (block: IStructuredD3Block) => block.subYomTov ) // just take the 0 year. All years [should] have same Yom Tovs
+    activeData[0].map((block: IStructuredD3Block) => block.subYomTov) // just take the 0 year. All years [should] have same Yom Tovs
   )
 );
 
@@ -46,28 +46,26 @@ let filterOutHolidays: string[] = [];
 d3.selectAll(".chkbox").on("change", filterHolidays);
 
 function filterHolidays() {
-  console.log("[filterOutHolidays]...");
   var newData: any[];
-  var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)" );
+  var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll("input[type=checkbox]:not(:checked)");
   filterOutHolidays = [];
   for (var i = 0; i < checkboxes.length; i++) {
     filterOutHolidays.push(checkboxes[i].value);
-    console.log("filterOutHolidays", filterOutHolidays);
   }
   newData = [];
   for (var d1 = 0; d1 < originalData.length; d1++) {
-  newData[d1] = [];
-  for (var d2 = 0; d2 < originalData[d1].length; d2++) {
+    newData[d1] = [];
+    for (var d2 = 0; d2 < originalData[d1].length; d2++) {
       if (filterOutHolidays.indexOf(originalData[d1][d2].yomTov) === -1) {
-      newData[d1].push(originalData[d1][d2]);
-      // originalData[d1][d2]['hide'] = true;
+        newData[d1].push(originalData[d1][d2]);
+        // originalData[d1][d2]['hide'] = true;
       }
-  }
+    }
   }
   activeData = newData;
   draw();
   return true;
-} 
+}
 
 
 // Checkboxes
@@ -77,22 +75,20 @@ let checkBoxArea = d3
   .data(AVAILABLE_YOM_TOVS)
   .enter()
   .append('li')
-    .attr("class", "list-group-item")
+  .attr("class", "list-group-item")
   .append('label')
-    .attr('for', (d, i) => 'chkbox_' + minifyYTName(d) )
-    .text( (d: string) => { return d; } )
+  .attr('for', (d, i) => 'chkbox_' + minifyYTName(d))
+  .text((d: string) => { return d; })
   .append("input")
-    .attr("class", "chkbox ml-2")
-    .attr("value", (d: string) => { return d; } )
-    .attr("id", (d, i) => 'chkbox_' + minifyYTName(d) )
-    .attr("type", "checkbox")
-    .attr("checked", (ytName) => {
-      console.log('defaultCheckedYomTovs.indexOf(ytName)', ytName, defaultCheckedYomTovs.indexOf(ytName));
-      return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
-      // return null;
-    });
-  
-  d3.selectAll(".chkbox").on("change", filterHolidays);
+  .attr("class", "chkbox ml-2")
+  .attr("value", (d: string) => { return d; })
+  .attr("id", (d, i) => 'chkbox_' + minifyYTName(d))
+  .attr("type", "checkbox")
+  .attr("checked", (ytName) => {
+    return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+  });
+
+d3.selectAll(".chkbox").on("change", filterHolidays);
 
 
 // set the ranges
@@ -113,17 +109,17 @@ function draw() {
     .select("#calendar-area > svg").remove();
   /* Tooltip Holder */
 
-let div = d3
-  .select("#calendar-area")
-  .append("div")
-  .attr("class", "tooltip")
-  .style("opacity", 0);
+  let div = d3
+    .select("#calendar-area")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
-let svg_main = d3
+  let svg_main = d3
     .select("#calendar-area")
     .append("svg");
 
-let svg = svg_main
+  let svg = svg_main
     .attr("width", constants.width + constants.margin.left + constants.margin.right)
     .attr("width", constants.width + constants.margin.left + constants.margin.right)
     .attr("height", constants.height + constants.margin.top + constants.margin.bottom)
@@ -166,12 +162,12 @@ let svg = svg_main
     .enter()
     .append("text")
     .text(i => i)
-    .attr("x", (i:any) => {
+    .attr("x", (i: any) => {
       const domainValue = x(i);
       if (domainValue) return domainValue + LEFT_MARGIN;
       return LEFT_MARGIN;
       //else throw Error('x(i) returned undefined!');
-    } )
+    })
     .attr("class", "year-text")
     .style("fill", "black");
   //console.log("data", data);
@@ -180,7 +176,6 @@ let svg = svg_main
   const yearGroup = svg
     .selectAll(".year-group")
     .data(activeData, (d: any) => {
-      console.log("d", d[0].year);
       return d ? d[0].year : 0;
     }) // key is the year
     .enter()
@@ -212,7 +207,7 @@ let svg = svg_main
   // Each day
   const bars = yearGroup
     .selectAll(".bar-groups")
-    .data(d => d, (d:any) => `${d.year}-${d.yomTov}-${d.subYomTov}`);
+    .data(d => d, (d: any) => `${d.year}-${d.yomTov}-${d.subYomTov}`);
 
   bars
     .enter()
@@ -221,8 +216,8 @@ let svg = svg_main
     // })
     .append("rect")
     .attr("class", "bar")
-    .attr("day", (dayObj:any) => dayObj.day)
-    .attr("row-number-wrt-year", (d: any, i, j:any) => {
+    .attr("day", (dayObj: any) => dayObj.day)
+    .attr("row-number-wrt-year", (d: any, i, j: any) => {
       if (i === 0) return "0";
       var newIndex;
       const previousDay = j[i - 1].attributes.day.value;
@@ -264,7 +259,7 @@ let svg = svg_main
     .attr("height", 20)
     .style("fill", (dayObj: any) => constants.colors[dayObj.yomTov] || "#222")
     // TOOLTIP START
-    .on("mouseover", function(d: any) {
+    .on("mouseover", function (d: any) {
       let tooltipString = d.yomTov;
       if (d.subYomTov && d.subYomTov !== d.yomTov) {
         tooltipString = tooltipString + "/ " + d.subYomTov;
@@ -279,7 +274,7 @@ let svg = svg_main
         .style("left", d3.select(this).attr("x") + "px")
         .style("top", d3.event.pageY - 28 + "px");
     })
-    .on("mouseout", function(d) {
+    .on("mouseout", function (d) {
       div
         .transition()
         .duration(500)
@@ -322,10 +317,10 @@ const bars = yomTovObjects.selectAll()
 
 
   // Recalculate the height of visualizer area
-  svg_main.attr("height", 
+  svg_main.attr("height",
     (totalNumberOfRows * constants.rowHeight) + // all the rows
-    ((originalData.length-1 ) * constants.interyearMargin)  + // all the spaces between the rows
-    constants.margin.bottom*2 );
+    ((originalData.length - 1) * constants.interyearMargin) + // all the spaces between the rows
+    constants.margin.bottom * 2);
 }
 
 filterHolidays();

@@ -36,8 +36,6 @@ export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
         })
     }
 
-    console.log('sets', hebcalRaw.year, sets);
-
 
     return {
         year: hebcalRaw.year,

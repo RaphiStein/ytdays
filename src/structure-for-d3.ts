@@ -30,7 +30,7 @@ export function restructure (allYears: IInputYear[]): IStructuredD3Block[][] {
       }
       blocksGroupedByYear.push(allBlocksInCurrentYear);
     }
-    console.log('blocksGroupedByYear', blocksGroupedByYear);
+    // console.log('blocksGroupedByYear', blocksGroupedByYear);
     return blocksGroupedByYear;
   }
 
