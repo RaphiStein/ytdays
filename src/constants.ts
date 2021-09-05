@@ -2,7 +2,7 @@
 
 const MARGIN = { top: 20, right: 20, bottom: 30, left: 80 };
 
-export const constants:any = {
+export const constants: any = {
   margin: MARGIN,
   width: 960 - MARGIN.left - MARGIN.right,
   height: 500 - MARGIN.top - MARGIN.bottom,
@@ -18,18 +18,17 @@ export const constants:any = {
     Pesach: "#CAE5E8",
     Shavuot: "#7CF000",
     //"Shavuot": "#FFD700",
-  }
-}
+  },
+};
 
 /** These Yom Tovs are the ones checked by default on load */
-export const defaultCheckedYomTovs = ['Rosh Hashana', 'Yom Kippur'];
+export const defaultCheckedYomTovs = ["Rosh Hashana", "Yom Kippur"];
 
 export let globals = {
   saturdayFlag: false,
   calendarHeight: 200,
-  currentRow: -1
-}
-
+  currentRow: -1,
+};
 
 export const daysOfWeek = [
   "Sunday",
@@ -38,5 +37,5 @@ export const daysOfWeek = [
   "Wednesday",
   "Thursday",
   "Friday",
-  "Saturday"
+  "Saturday",
 ];
