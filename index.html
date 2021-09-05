@@ -15,7 +15,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78835087-3"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'UA-78835087-3');
@@ -72,11 +72,25 @@
         </ul>
       </div> -->
 
-      <div id="calendar-area" class="col-lg-9"></div>
+      <div class="col-lg-9">
+        <div class="row">
+          <div class="col-lg-12"><button id="previousyearsbtn" class="btn">Load 3 previous years</button></div>
+          <div class="col-lg-12">
+            <div id="calendar-area"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="row">
+      <div class="col-lg-3 col-sm-12 col-md-12"></div>
+      <div class="col-lg-9 mt-3">
+        <button id="followingyearsbtn" class="btn">Load next 3 years</button>
+      </div>
     </div>
   </div>
 
-  <footer>Made with ♥ by <a href="https://www.linkedin.com/in/raphistein">Raphi</a></footer>
+  <footer>By <a href="https://www.linkedin.com/in/raphistein">Raphi</a></footer>
 
   <!-- Scripts -->
   <!-- <script src="https://d3js.org/d3.v4.min.js">

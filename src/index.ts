@@ -1,18 +1,18 @@
-import { dates } from "./dates";
-
 import * as d3 from "d3";
 import { restructure } from "./structure-for-d3";
 import { constants, daysOfWeek, defaultCheckedYomTovs } from "./constants";
-import { calculateNumberOfRows, minifyYTName } from "./utils";
+import {
+  atLeastOneYomTovIsSelected,
+  calculateNumberOfRows,
+  minifyYTName,
+} from "./utils";
 import { structureFromHebcal } from "./structure-from-hebcal";
 import { IInputYear, IStructuredD3Block } from "./types";
 import { hebcal_data } from "./hebcal-data";
+import { buildYearRange, loadYears, PreviousOrFollowing } from "./load-years";
 
-let originalData;
-let activeData: any[] = [];
-
-originalData = restructure(dates);
-activeData = originalData;
+let originalData: IStructuredD3Block[][];
+let activeData: IStructuredD3Block[][] = [];
 
 // LOAD DATA FROM HEBCAL
 // var xmlHttp = new XMLHttpRequest();
@@ -20,15 +20,12 @@ activeData = originalData;
 // xmlHttp.send( null );
 //let hebcalDataProcessed = <IHebcalYearRaw>JSON.parse(xmlHttp.responseText);
 
-let hebcalDataProcessed = hebcal_data;
 const structuredYears: IInputYear[] = [];
-hebcalDataProcessed.forEach((hebcalYear) =>
+hebcal_data.forEach((hebcalYear) =>
   structuredYears.push(structureFromHebcal(hebcalYear))
 );
 //const structuredByYear = structureFromHebcal(hebcalDataProcessed);
-//console.log("structuredByYear", structuredByYear);
 originalData = restructure(structuredYears);
-//console.log("Original Data", originalData);
 activeData = originalData;
 
 const AVAILABLE_YOM_TOVS: string[] = Array.from(
@@ -37,16 +34,46 @@ const AVAILABLE_YOM_TOVS: string[] = Array.from(
   )
 );
 
-/*const structuredByYear: IInputYear[] = [structureByYear(parsedResponse)];
-activeData = restructure(structuredByYear);*/
+const previousyearsbtn = document.getElementById("previousyearsbtn");
+if (previousyearsbtn) {
+  previousyearsbtn.addEventListener("click", async () => {
+    loadAdditionalYears("previous");
+  });
+}
+const followingyearsbtn = document.getElementById("followingyearsbtn");
+if (followingyearsbtn) {
+  followingyearsbtn.addEventListener("click", async () => {
+    loadAdditionalYears("following");
+  });
+}
+
+async function loadAdditionalYears(previousOrFollowing: PreviousOrFollowing) {
+  const yearRange = buildYearRange(
+    previousOrFollowing,
+    previousOrFollowing === "previous"
+      ? Number(activeData[0][0].year)
+      : Number(activeData[activeData.length - 1][0].year)
+  );
+  const additionalYears = await loadYears(...yearRange);
+  if (previousOrFollowing === "previous") {
+    originalData = [...additionalYears, ...originalData];
+  } else {
+    originalData = [...originalData, ...additionalYears];
+  }
+  filterHolidays();
+  draw();
+}
 
 console.log("Starting script..");
 
 let filterOutHolidays: string[] = [];
 
-d3.selectAll(".chkbox").on("change", filterHolidays);
+d3.selectAll(".chkbox").on("change", () => {
+  filterHolidays();
+  draw();
+});
 
-function filterHolidays() {
+function filterHolidays(): void {
   var newData: any[];
   var checkboxes: NodeListOf<HTMLInputElement> = document.querySelectorAll(
     "input[type=checkbox]:not(:checked)"
@@ -66,8 +93,6 @@ function filterHolidays() {
     }
   }
   activeData = newData;
-  draw();
-  return true;
 }
 
 // Checkboxes
@@ -94,7 +119,10 @@ let checkBoxArea = d3
     return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
   });
 
-d3.selectAll(".chkbox").on("change", filterHolidays);
+d3.selectAll(".chkbox").on("change", () => {
+  filterHolidays();
+  draw();
+});
 
 // set the ranges
 var x = d3
@@ -174,9 +202,9 @@ function draw() {
 
   const yearGroup = svg
     .selectAll(".year-group")
-    .data(activeData, (d: any) => {
-      return d ? d[0].year : 0;
-    }) // key is the year
+    .data(activeData, (d: any) =>
+      atLeastOneYomTovIsSelected(d) ? d[0].year : 0
+    ) // key is the year
     .enter()
     .append("g")
     .attr("year-height", (d, i, j) => {
@@ -203,7 +231,9 @@ function draw() {
       }
       return "translate(0," + totalOffset + ")";
     })
-    .attr("id", (d) => "year-" + d[0].year); // just take first element's year, to determine year of group
+    .attr("id", (d) =>
+      atLeastOneYomTovIsSelected(d) ? "year-" + d[0].year : ""
+    ); // just take first element's year, to determine year of group
 
   // Each day
   const bars = yearGroup.selectAll(".bar-groups").data(
@@ -309,7 +339,7 @@ const bars = yomTovObjects.selectAll()
       var numberOfRows = calculateNumberOfRows(d);
       return `translate(-40, ${numberOfRows*rowHeight})`
     })*/
-    .text((d) => d[0].year);
+    .text((d) => (atLeastOneYomTovIsSelected(d) ? d[0].year : ""));
 
   // Recalculate the height of visualizer area
   const calculatedFinalHeight =

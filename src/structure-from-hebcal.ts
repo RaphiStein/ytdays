@@ -3,7 +3,7 @@ import {
   IInputYear,
   IInputSetItem,
   IInputSet,
-  IHebcalYearItem,
+  IHebcalYomTovItem,
   YomTov,
 } from "./types";
 import { dateToDayOfWeek } from "./utils";
@@ -12,11 +12,19 @@ import { dateToDayOfWeek } from "./utils";
 
 export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
   // Parse year from title
-  hebcalRaw.year = hebcalRaw.title.split(" ")[1];
+  const parsedYear = hebcalRaw.title.match(/\d+$/);
+  if (!parsedYear || !parseInt(parsedYear[0])) {
+    throw "Could not parse year for " + hebcalRaw.title;
+  }
+  hebcalRaw.year = parsedYear[0];
 
-  const yomTovSets: { [key: string]: IHebcalYearItem[] } =
-    hebcalRaw.items.reduce(function (accumulator, i) {
-      (accumulator[i.memo] = accumulator[i.memo] || []).push(i);
+  const yomTovSets: { [key: string]: IHebcalYomTovItem[] } = hebcalRaw.items
+    .filter((hcyi) => !hcyi.title.match(/^Erev.*/))
+    .reduce(function (accumulator, hcyi) {
+      const processedTitle = unifyYomTovNames(hcyi.title);
+      (accumulator[processedTitle] = accumulator[processedTitle] || []).push(
+        hcyi
+      );
       return accumulator;
     }, {});
 
@@ -26,16 +34,19 @@ export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
   for (let s of mappedToArray) {
     const setItems: IInputSetItem[] = [];
     for (const hebCalYearItem of s) {
-      if (hebCalYearItem.title.match(/^Erev.*/)) continue;
+      const processedName = unifyYomTovNames(hebCalYearItem.title);
 
       setItems.push({
-        name: convertHebcalMemoToYomTovName(hebCalYearItem.memo),
+        name: processedName,
         days: [dateToDayOfWeek(hebCalYearItem.date)],
       });
+      //}
     }
 
+    const processedName = unifyYomTovNames(s[0].title);
+
     sets.push({
-      setName: convertHebcalMemoToYomTovName(s[0].memo),
+      setName: processedName,
       setItems,
     });
   }
@@ -47,30 +58,64 @@ export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
 }
 
 /** Hebcal names are different for different days of a Yom Tov, i.e. "Pesach I" and "Pesach II"
- * this function uses the memo field (which is the same for all days) to unify the Yom Tov name
+ * this function unifies the variations (i.e. Sukkot I & Sukkot II) into a single name
  */
-function convertHebcalMemoToYomTovName(memo: string): YomTov {
-  switch (memo) {
-    case "Purim is one of the most joyous and fun holidays on the Jewish calendar":
-      return YomTov.Purim;
-    case "Passover, the Feast of Unleavened Bread":
-      return YomTov.Pesach;
-    case "Festival of Weeks, commemorates the giving of the Torah at Mount Sinai":
-      return YomTov.Shavuot;
-    case "The Ninth of Av, fast commemorating the destruction of the two Temples":
-      return YomTov.TishaBav;
-    case "The Jewish New Year":
-      return YomTov.RoshHashana;
-    case "Day of Atonement":
-      return YomTov.YomKippur;
-    case "Feast of Tabernacles":
-      return YomTov.Sukkot;
-    case "Eighth Day of Assembly":
-    case "Day of Celebrating the Torah":
-      return YomTov.SheminiAtzeret;
-    case "The Jewish festival of rededication, also known as the Festival of Lights":
-      return YomTov.Chanukah;
-    default:
-      throw 'Memo does not match any holiday! "' + memo + '"';
+function unifyYomTovNames(yomTovHebCalName: string): YomTov {
+  if (yomTovHebCalName.indexOf("Rosh Hashana") >= 0) {
+    return YomTov.RoshHashana;
   }
+
+  if (yomTovHebCalName === "Yom Kippur") {
+    return YomTov.YomKippur;
+  }
+
+  if (
+    yomTovHebCalName === "Sukkot I" ||
+    yomTovHebCalName === "Sukkot II" ||
+    yomTovHebCalName === "Sukkot III (CH''M)" ||
+    yomTovHebCalName === "Sukkot IV (CH''M)" ||
+    yomTovHebCalName === "Sukkot V (CH''M)" ||
+    yomTovHebCalName === "Sukkot VI (CH''M)" ||
+    yomTovHebCalName === "Sukkot VII (Hoshana Raba)"
+  ) {
+    return YomTov.Sukkot;
+  }
+
+  if (
+    yomTovHebCalName === "Shmini Atzeret" ||
+    yomTovHebCalName === "Simchat Torah"
+  ) {
+    return YomTov.SheminiAtzeret;
+  }
+
+  if (yomTovHebCalName.indexOf("Chanukah") >= 0) {
+    return YomTov.Chanukah;
+  }
+
+  if (yomTovHebCalName === "Purim") {
+    return YomTov.Purim;
+  }
+
+  if (
+    yomTovHebCalName === "Pesach I" ||
+    yomTovHebCalName === "Pesach II" ||
+    yomTovHebCalName === "Pesach III (CH''M)" ||
+    yomTovHebCalName === "Pesach IV (CH''M)" ||
+    yomTovHebCalName === "Pesach V (CH''M)" ||
+    yomTovHebCalName === "Pesach VI (CH''M)" ||
+    yomTovHebCalName === "Pesach VII" ||
+    yomTovHebCalName === "Pesach VIII"
+  ) {
+    return YomTov.Pesach;
+  }
+
+  if (yomTovHebCalName.indexOf("Shavuot") >= 0) {
+    return YomTov.Shavuot;
+  }
+
+  if (yomTovHebCalName.indexOf("Tish'a B'Av") >= 0) {
+    return YomTov.TishaBav;
+  }
+
+  throw "Unhandled Yom Tov " + yomTovHebCalName;
 }

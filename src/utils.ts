@@ -1,5 +1,5 @@
 import { daysOfWeek } from "./constants";
-import { Day } from "./types";
+import { Day, IStructuredD3Block } from "./types";
 
 export function calculateNumberOfRows(arrayOfDays: any[]) {
   //console.log('arrayOfDays', arrayOfDays);
@@ -52,3 +52,7 @@ export function dateToDayOfWeek(date: string): Day {
 export const minifyYTName = (name: string) => {
   return name.replace(" ", "").toLowerCase();
 };
+
+export function atLeastOneYomTovIsSelected(item: IStructuredD3Block[]) {
+  return item && item.length;
+}
