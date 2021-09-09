@@ -1,15 +1,10 @@
 export interface IInputYear {
   year: string;
-  sets: IInputSet[];
+  yomTovSets: IYomTovDays[];
 }
 
-export interface IInputSet {
-  setName: YomTov;
-  setItems: IInputSetItem[];
-}
-
-export interface IInputSetItem {
-  name: YomTov;
+export interface IYomTovDays {
+  yomTovName: YomTov;
   days: Day[];
 }
 
