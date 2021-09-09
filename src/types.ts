@@ -4,7 +4,7 @@ export interface IInputYear {
 }
 
 export interface IInputSet {
-  setName: string;
+  setName: YomTov;
   setItems: IInputSetItem[];
 }
 
@@ -18,9 +18,13 @@ export interface IHebcalYearRaw {
   items: IHebcalYomTovItem[];
   link?: string; // link to API url that was fetched to get this result
   location?: { geo: string };
-  year?: string; // appended later by this app. Parsed from title
+  year?: string; // appended later by this app. Parsed from title,
 }
 
+/**
+ * Represents a single day of a YomTov.
+ * For example, Sukkot I, or Sukkot II, etc
+ */
 export interface IHebcalYomTovItem {
   title: string;
   link: string; // i.e https://www.hebcal.com/holidays/purim,
@@ -30,12 +34,13 @@ export interface IHebcalYomTovItem {
   subcat?: string; // "major",
   memo: string; // "Purim is one of the most joyous and fun holidays on the Jewish calendar"
   yomtov?: boolean;
+  leyning?: { [key: string]: string };
 }
 
 /** Block = a single day and and all the data that goes with it */
 export interface IStructuredD3Block {
   year: string;
-  yomTov: string;
+  yomTov: YomTov;
   yomTovIndex: number;
   yomTovColor: string;
   subYomTov: string;
@@ -58,14 +63,15 @@ export enum Day {
 }
 
 export enum YomTov {
-  Purim = "Purim",
-  Pesach = "Pesach",
-  Shavuot = "Shavuot",
-  TishaBav = "Tisha B'av",
-  TuBishvat = "Tu BiShvat",
   RoshHashana = "Rosh Hashana",
   YomKippur = "Yom Kippur",
   Sukkot = "Sukkot",
   SheminiAtzeret = "SheminiAtzeret",
   Chanukah = "Chanukah",
+  TuBishvat = "Tu BiShvat",
+  Purim = "Purim",
+  Pesach = "Pesach",
+  LagBaomer = "Lag BaOmer",
+  Shavuot = "Shavuot",
+  TishaBav = "Tisha B'av",
 }

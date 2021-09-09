@@ -1,5 +1,5 @@
 import { daysOfWeek } from "./constants";
-import { Day, IStructuredD3Block } from "./types";
+import { Day, IStructuredD3Block, YomTov } from "./types";
 
 export function calculateNumberOfRows(arrayOfDays: any[]) {
   //console.log('arrayOfDays', arrayOfDays);
@@ -55,4 +55,33 @@ export const minifyYTName = (name: string) => {
 
 export function atLeastOneYomTovIsSelected(item: IStructuredD3Block[]) {
   return item && item.length;
+}
+
+export function sortYomTovs(yomTov: YomTov): number {
+  switch (yomTov) {
+    case YomTov.RoshHashana:
+      return 1;
+    case YomTov.YomKippur:
+      return 2;
+    case YomTov.Sukkot:
+      return 3;
+    case YomTov.SheminiAtzeret:
+      return 4;
+    case YomTov.Chanukah:
+      return 5;
+    case YomTov.TuBishvat:
+      return 6;
+    case YomTov.Purim:
+      return 7;
+    case YomTov.Pesach:
+      return 8;
+    case YomTov.LagBaomer:
+      return 9;
+    case YomTov.Shavuot:
+      return 10;
+    case YomTov.TishaBav:
+      return 11;
+    default:
+      return 0;
+  }
 }

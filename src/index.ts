@@ -5,6 +5,7 @@ import {
   atLeastOneYomTovIsSelected,
   calculateNumberOfRows,
   minifyYTName,
+  sortYomTovs,
 } from "./utils";
 import { structureFromHebcal } from "./structure-from-hebcal";
 import { IInputYear, IStructuredD3Block } from "./types";
@@ -30,9 +31,9 @@ activeData = originalData;
 
 const AVAILABLE_YOM_TOVS: string[] = Array.from(
   new Set(
-    activeData[0].map((block: IStructuredD3Block) => block.subYomTov) // just take the 0 year. All years [should] have same Yom Tovs
+    activeData[0].map((block: IStructuredD3Block) => block.yomTov) // just take the 0 year. All years [should] have same Yom Tovs
   )
-);
+).sort((yt1, yt2) => sortYomTovs(yt1) - sortYomTovs(yt2));
 
 const previousyearsbtn = document.getElementById("previousyearsbtn");
 if (previousyearsbtn) {
