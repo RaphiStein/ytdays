@@ -11,6 +11,7 @@ import { dateToDayOfWeek } from "./utils";
 /** Converts HebCal structure to IInputYear for a single year */
 
 export function structureFromHebcal(hebcalRaw: IHebcalYearRaw): IInputYear {
+  console.log("hebcalRaw", hebcalRaw);
   // Parse year from title
   const parsedYear = hebcalRaw.title.match(/\d+$/);
   if (!parsedYear || !parseInt(parsedYear[0])) {
@@ -89,7 +90,10 @@ function unifyYomTovNames(yomTovHebCalItem: IHebcalYomTovItem): YomTov | null {
     return YomTov.SheminiAtzeret;
   }
 
-  if (yomTovHebCalItem.title.indexOf("Chanukah") >= 0) {
+  if (
+    yomTovHebCalItem.title.indexOf("Chanukah") >= 0 &&
+    yomTovHebCalItem.subcat === "major" // hebcal returns "Zos Chanukah as a separate minor holiday"
+  ) {
     return YomTov.Chanukah;
   }
 
