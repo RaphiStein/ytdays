@@ -22,7 +22,7 @@ export async function loadYears(
 
   let promises: Promise<any>[] = [];
   for (let i = startYear; i <= endYear; i++) {
-    const url = `https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on;min=off;mod=off;nx=off;year=${i};month=x;mf=off;c=off`;
+    const url = `https://www.hebcal.com/hebcal/?v=1&cfg=json&maj=on;min=on;mod=off;nx=off;year=${i};month=x;mf=off;c=off`;
     promises.push(
       fetch(url)
         .then(function (response) {
