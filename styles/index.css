@@ -27,9 +27,20 @@ text {
   font-family: Helvetica;
 }
 
+.weekend-column {
+  fill: #f4f1fa;
+}
+
+#new-checkboxes-area .list-group-item {
+  padding: 0.5rem 1rem;
+}
+
+#new-checkboxes-area .custom-control-label {
+  cursor: pointer;
+}
+
 footer {
-  position: fixed;
-  bottom: 0px;
+  margin-top: 2rem;
   font-style: oblique;
   font-variant: all-petite-caps;
   padding: 1rem 3rem;

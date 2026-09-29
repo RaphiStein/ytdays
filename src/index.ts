@@ -104,13 +104,12 @@ let checkBoxArea = d3
   .enter()
   .append("li")
   .attr("class", "list-group-item")
-  .append("label")
-  .attr("for", (d, i) => "chkbox_" + minifyYTName(d))
-  .text((d: string) => {
-    return d;
-  })
+  .append("div")
+  .attr("class", "custom-control custom-checkbox");
+
+checkBoxArea
   .append("input")
-  .attr("class", "chkbox ml-2")
+  .attr("class", "chkbox custom-control-input")
   .attr("value", (d: string) => {
     return d;
   })
@@ -118,6 +117,14 @@ let checkBoxArea = d3
   .attr("type", "checkbox")
   .attr("checked", (ytName) => {
     return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+  });
+
+checkBoxArea
+  .append("label")
+  .attr("class", "custom-control-label")
+  .attr("for", (d, i) => "chkbox_" + minifyYTName(d))
+  .text((d: string) => {
+    return d;
   });
 
 d3.selectAll(".chkbox").on("change", () => {
@@ -132,6 +139,7 @@ var x = d3
   .range([0, constants.width]);
 
 const dayWidth = x.bandwidth();
+const BAR_PADDING = 3;
 
 function draw() {
   // append the svg object to the body of the page
@@ -282,14 +290,16 @@ function draw() {
     .transition()
     .duration(500)*/
     .attr("x", (dayObj: any) => {
-      return daysOfWeek.indexOf(dayObj.day) * dayWidth;
+      return daysOfWeek.indexOf(dayObj.day) * dayWidth + BAR_PADDING;
     })
     .attr("y", (d, i, j: any) => {
       return j[i].attributes["row-number-wrt-year"].value * constants.rowHeight;
     })
     // END ANIMATION
-    .attr("width", (i) => dayWidth)
+    .attr("width", (i) => dayWidth - BAR_PADDING * 2)
     .attr("height", 20)
+    .attr("rx", 4)
+    .attr("ry", 4)
     .style("fill", (dayObj: any) => constants.colors[dayObj.yomTov] || "#222")
     // TOOLTIP START
     .on("mouseover", function (d: any) {
@@ -348,6 +358,17 @@ const bars = yomTovObjects.selectAll()
     (originalData.length - 1) * constants.interyearMargin + // all the spaces between the rows
     constants.margin.bottom * 2;
   svg_main.attr("height", calculatedFinalHeight);
+
+  // Shade the weekend columns behind everything else
+  ["Sunday", "Saturday"].forEach((day) => {
+    svg
+      .insert("rect", ":first-child")
+      .attr("class", "weekend-column")
+      .attr("x", daysOfWeek.indexOf(day) * dayWidth)
+      .attr("y", 0)
+      .attr("width", dayWidth)
+      .attr("height", calculatedFinalHeight);
+  });
 
   // Draw the day swimlanes
   svg
