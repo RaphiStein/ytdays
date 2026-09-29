@@ -46,6 +46,16 @@ text {
   fill: #f4f1fa;
 }
 
+@media (min-width: 992px) {
+  #new-checkboxes-area {
+    position: sticky;
+    top: 1rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
 #new-checkboxes-area .list-group-item {
   padding: 0.5rem 1rem;
 }
