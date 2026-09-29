@@ -148,6 +148,22 @@ describe("D3 calendar rendering (checkbox filtering)", () => {
     expect(document.querySelectorAll("rect.bar")).toHaveLength(126);
   });
 
+  it("checks every holiday and draws all years when Select all is clicked", () => {
+    document.getElementById("selectallbtn")!.click();
+
+    expect(getCheckedHolidayValues()).toEqual(getAllHolidayCheckboxValues());
+    expect(getYearGroupIds()).toHaveLength(14);
+    expect(document.querySelectorAll("rect.bar").length).toBeGreaterThan(154);
+  });
+
+  it("unchecks every holiday and clears the calendar when Deselect all is clicked", () => {
+    document.getElementById("deselectallbtn")!.click();
+
+    expect(getCheckedHolidayValues()).toEqual([]);
+    expect(document.querySelectorAll("rect.bar")).toHaveLength(0);
+    expect(getYearGroupIds()).toHaveLength(0);
+  });
+
   it("clears year groups and bars when every holiday is unchecked", () => {
     for (const value of getCheckedHolidayValues()) {
       clickCheckboxByValue(value);

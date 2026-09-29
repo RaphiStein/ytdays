@@ -4,6 +4,8 @@ import * as path from "path";
 const APP_SHELL = `
   <div class="container">
     <div id="new-checkboxes-area">
+      <button id="selectallbtn">Select all</button>
+      <button id="deselectallbtn">Deselect all</button>
       <ul class="list-group"></ul>
     </div>
     <button id="previousyearsbtn" class="btn">Load 3 previous years</button>

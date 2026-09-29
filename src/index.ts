@@ -48,6 +48,23 @@ if (followingyearsbtn) {
   });
 }
 
+function setAllHolidaysChecked(checked: boolean): void {
+  document
+    .querySelectorAll<HTMLInputElement>(".chkbox")
+    .forEach((checkbox) => (checkbox.checked = checked));
+  filterHolidays();
+  draw();
+}
+
+const selectallbtn = document.getElementById("selectallbtn");
+if (selectallbtn) {
+  selectallbtn.addEventListener("click", () => setAllHolidaysChecked(true));
+}
+const deselectallbtn = document.getElementById("deselectallbtn");
+if (deselectallbtn) {
+  deselectallbtn.addEventListener("click", () => setAllHolidaysChecked(false));
+}
+
 async function loadAdditionalYears(previousOrFollowing: PreviousOrFollowing) {
   const yearRange = buildYearRange(
     previousOrFollowing,
