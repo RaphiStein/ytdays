@@ -9,16 +9,29 @@ const APP_SHELL = `
       <ul class="list-group"></ul>
     </div>
     <button id="previousyearsbtn" class="btn">Load 3 previous years</button>
+    <small id="previousyearserror" hidden></small>
     <div id="calendar-area"></div>
     <button id="followingyearsbtn" class="btn">Load next 3 years</button>
+    <small id="followingyearserror" hidden></small>
   </div>
 `;
+
+export interface LoadAppOptions {
+  /** Page URL path + query to load with, e.g. "/?holidays=pesach". Defaults to "/". */
+  url?: string;
+  /** Keep localStorage and the current URL from a previous load (simulates a page reload). */
+  keepSavedState?: boolean;
+}
 
 /**
  * Loads the built webpack bundle into a fresh DOM shell that mirrors index.html.
  * Does not import or modify any application source modules.
  */
-export function loadApp(): void {
+export function loadApp(options: LoadAppOptions = {}): void {
+  if (!options.keepSavedState) {
+    window.localStorage.clear();
+    window.history.replaceState(null, "", options.url || "/");
+  }
   document.body.innerHTML = APP_SHELL;
 
   const bundlePath = path.resolve(__dirname, "../../dist/bundle.js");

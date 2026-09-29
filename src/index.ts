@@ -11,6 +11,7 @@ import { structureFromHebcal } from "./structure-from-hebcal";
 import { IInputYear, IStructuredD3Block } from "./types";
 import { hebcal_data } from "./hebcal-data";
 import { buildYearRange, loadYears, PreviousOrFollowing } from "./load-years";
+import { loadSavedSelection, saveSelection } from "./selection-storage";
 
 let originalData: IStructuredD3Block[][];
 let activeData: IStructuredD3Block[][] = [];
@@ -35,23 +36,37 @@ const AVAILABLE_YOM_TOVS: string[] = Array.from(
   )
 ).sort((yt1, yt2) => sortYomTovs(yt1) - sortYomTovs(yt2));
 
+const initiallyCheckedYomTovs: string[] =
+  loadSavedSelection(AVAILABLE_YOM_TOVS) || defaultCheckedYomTovs;
+
+const CURRENT_YEAR = String(new Date().getFullYear());
+
 const previousyearsbtn = document.getElementById("previousyearsbtn");
 if (previousyearsbtn) {
   previousyearsbtn.addEventListener("click", async () => {
-    loadAdditionalYears("previous");
+    loadAdditionalYears("previous", previousyearsbtn as HTMLButtonElement);
   });
 }
 const followingyearsbtn = document.getElementById("followingyearsbtn");
 if (followingyearsbtn) {
   followingyearsbtn.addEventListener("click", async () => {
-    loadAdditionalYears("following");
+    loadAdditionalYears("following", followingyearsbtn as HTMLButtonElement);
   });
+}
+
+function saveCheckedHolidays(): void {
+  const checked: string[] = [];
+  document
+    .querySelectorAll<HTMLInputElement>(".chkbox:checked")
+    .forEach((checkbox) => checked.push(checkbox.value));
+  saveSelection(checked);
 }
 
 function setAllHolidaysChecked(checked: boolean): void {
   document
     .querySelectorAll<HTMLInputElement>(".chkbox")
     .forEach((checkbox) => (checkbox.checked = checked));
+  saveCheckedHolidays();
   filterHolidays();
   draw();
 }
@@ -65,21 +80,43 @@ if (deselectallbtn) {
   deselectallbtn.addEventListener("click", () => setAllHolidaysChecked(false));
 }
 
-async function loadAdditionalYears(previousOrFollowing: PreviousOrFollowing) {
-  const yearRange = buildYearRange(
-    previousOrFollowing,
-    previousOrFollowing === "previous"
-      ? Number(activeData[0][0].year)
-      : Number(activeData[activeData.length - 1][0].year)
-  );
-  const additionalYears = await loadYears(...yearRange);
-  if (previousOrFollowing === "previous") {
-    originalData = [...additionalYears, ...originalData];
-  } else {
-    originalData = [...originalData, ...additionalYears];
+async function loadAdditionalYears(
+  previousOrFollowing: PreviousOrFollowing,
+  button: HTMLButtonElement
+) {
+  const errorArea = document.getElementById(previousOrFollowing + "yearserror");
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="loading-spinner"></span> Loading…';
+  if (errorArea) errorArea.hidden = true;
+
+  try {
+    // Uses originalData because activeData years are empty when no holidays are checked
+    const yearRange = buildYearRange(
+      previousOrFollowing,
+      previousOrFollowing === "previous"
+        ? Number(originalData[0][0].year)
+        : Number(originalData[originalData.length - 1][0].year)
+    );
+    const additionalYears = await loadYears(...yearRange);
+    if (previousOrFollowing === "previous") {
+      originalData = [...additionalYears, ...originalData];
+    } else {
+      originalData = [...originalData, ...additionalYears];
+    }
+    filterHolidays();
+    draw();
+  } catch (e) {
+    console.error("Failed to load additional years", e);
+    if (errorArea) {
+      errorArea.textContent =
+        "Couldn't load more years. Check your connection and try again.";
+      errorArea.hidden = false;
+    }
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalLabel;
   }
-  filterHolidays();
-  draw();
 }
 
 console.log("Starting script..");
@@ -133,7 +170,7 @@ checkBoxArea
   .attr("id", (d, i) => "chkbox_" + minifyYTName(d))
   .attr("type", "checkbox")
   .attr("checked", (ytName) => {
-    return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+    return initiallyCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
   });
 
 checkBoxArea
@@ -145,6 +182,7 @@ checkBoxArea
   });
 
 d3.selectAll(".chkbox").on("change", () => {
+  saveCheckedHolidays();
   filterHolidays();
   draw();
 });
@@ -272,7 +310,21 @@ function draw() {
     })
     .attr("id", (d) =>
       atLeastOneYomTovIsSelected(d) ? "year-" + d[0].year : ""
-    ); // just take first element's year, to determine year of group
+    ) // just take first element's year, to determine year of group
+    .classed("current-year", (d) =>
+      atLeastOneYomTovIsSelected(d) ? d[0].year === CURRENT_YEAR : false
+    );
+
+  yearGroup
+    .filter(".current-year")
+    .append("rect")
+    .attr("class", "current-year-band")
+    .attr("x", -70)
+    .attr("y", -3)
+    .attr("rx", 6)
+    .attr("ry", 6)
+    .attr("width", constants.width + 70)
+    .attr("height", (d) => calculateNumberOfRows(d) * constants.rowHeight + 1);
 
   // Each day
   const bars = yearGroup.selectAll(".bar-groups").data(
@@ -370,6 +422,7 @@ const bars = yomTovObjects.selectAll()
 
   yearGroup
     .append("text")
+    .attr("class", "year-label")
     .attr("x", "-60")
     .attr("y", (d) => {
       var numberOfRows = calculateNumberOfRows(d);
