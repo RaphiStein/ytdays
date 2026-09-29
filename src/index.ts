@@ -162,6 +162,7 @@ function draw() {
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
+  d3.select("#calendar-area > .day-header").remove();
   d3.select("#calendar-area > svg").remove();
   /* Tooltip Holder */
 
@@ -170,6 +171,34 @@ function draw() {
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+  // Days of the week column headers, in a sticky strip above the calendar
+  const LEFT_MARGIN = 25;
+  const DAY_HEADER_HEIGHT = 28;
+  d3.select("#calendar-area")
+    .append("div")
+    .attr("class", "day-header")
+    .append("svg")
+    .attr(
+      "width",
+      constants.width + constants.margin.left + constants.margin.right
+    )
+    .attr("height", DAY_HEADER_HEIGHT)
+    .append("g")
+    .attr("transform", "translate(" + constants.margin.left + ",0)")
+    .selectAll(".text")
+    .data(daysOfWeek)
+    .enter()
+    .append("text")
+    .text((i) => i)
+    .attr("x", (i: any) => {
+      const domainValue = x(i);
+      if (domainValue) return domainValue + LEFT_MARGIN;
+      return LEFT_MARGIN;
+    })
+    .attr("y", DAY_HEADER_HEIGHT - 8)
+    .attr("class", "year-text")
+    .style("fill", "black");
 
   let svg_main = d3.select("#calendar-area").append("svg");
 
@@ -207,22 +236,6 @@ function draw() {
   //   .style("stroke", "#222")
   //   .style("fill", "none");
 
-  // Days of the week column headers
-  const LEFT_MARGIN = 25;
-  svg
-    .selectAll(".text")
-    .data(daysOfWeek)
-    .enter()
-    .append("text")
-    .text((i) => i)
-    .attr("x", (i: any) => {
-      const domainValue = x(i);
-      if (domainValue) return domainValue + LEFT_MARGIN;
-      return LEFT_MARGIN;
-      //else throw Error('x(i) returned undefined!');
-    })
-    .attr("class", "year-text")
-    .style("fill", "black");
   //console.log("data", data);
   // Scale the range of the data in the domains
 

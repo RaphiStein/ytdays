@@ -44,7 +44,7 @@ describe("D3 calendar rendering (default state)", () => {
 
   it("renders Sunday–Saturday column headers and day swimlanes", () => {
     const headers = Array.from(
-      document.querySelectorAll("#container text.year-text")
+      document.querySelectorAll("#calendar-area > .day-header text.year-text")
     ).map((el) => el.textContent);
 
     expect(headers).toEqual([
@@ -146,6 +146,16 @@ describe("D3 calendar rendering (checkbox filtering)", () => {
 
     expect(getCheckedHolidayValues()).toEqual(["Yom Kippur", "Pesach"]);
     expect(document.querySelectorAll("rect.bar")).toHaveLength(126);
+  });
+
+  it("keeps a single sticky day-of-week header after redrawing", () => {
+    clickCheckboxByValue("Pesach");
+    clickCheckboxByValue("Pesach");
+
+    expect(document.querySelectorAll("#calendar-area > .day-header")).toHaveLength(1);
+    expect(
+      document.querySelectorAll("#calendar-area > .day-header text.year-text")
+    ).toHaveLength(7);
   });
 
   it("checks every holiday and draws all years when Select all is clicked", () => {
