@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import {
   clickCheckboxByValue,
   getAllHolidayCheckboxValues,
@@ -112,6 +114,66 @@ describe("D3 calendar rendering (default state)", () => {
     );
 
     expect(roshHashanaSaturday2026).toBeDefined();
+  });
+});
+
+describe("D3 calendar rendering (holiday photos)", () => {
+  beforeEach(() => {
+    jest.spyOn(console, "log").mockImplementation(() => undefined);
+    loadApp();
+    document.getElementById("selectallbtn")!.click();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("defines a photo pattern for every holiday, pointing at an image that exists", () => {
+    const images = Array.from(
+      document.querySelectorAll("#calendar-area > svg > defs > pattern > image")
+    );
+
+    expect(images).toHaveLength(getAllHolidayCheckboxValues().length);
+    for (const image of images) {
+      const href = image.getAttribute("href")!;
+      expect(href).toMatch(/^images\/holidays\/.+\.jpg$/);
+      expect(fs.existsSync(path.resolve(__dirname, "..", href))).toBe(true);
+    }
+  });
+
+  it("covers every bar with a matching photo overlay that doesn't block the tooltip", () => {
+    const bars = Array.from(document.querySelectorAll("rect.bar"));
+    const photos = Array.from(document.querySelectorAll("rect.bar-photo"));
+
+    expect(photos).toHaveLength(bars.length);
+
+    bars.forEach((bar) => {
+      const overlay = photos.find(
+        (photo) =>
+          photo.parentNode === bar.parentNode &&
+          photo.getAttribute("x") === bar.getAttribute("x") &&
+          photo.getAttribute("y") === bar.getAttribute("y")
+      );
+      expect(overlay).toBeDefined();
+      expect(overlay!.getAttribute("width")).toBe(bar.getAttribute("width"));
+      expect(overlay!.getAttribute("pointer-events")).toBe("none");
+
+      const patternId = /^url\(#(.+)\)$/.exec(overlay!.getAttribute("fill")!)![1];
+      expect(document.getElementById(patternId)?.tagName).toBe("pattern");
+    });
+  });
+
+  it("uses the Sukkot photo on Sukkot bars", () => {
+    const sukkotPattern = document.getElementById("photo-sukkot");
+    expect(sukkotPattern?.querySelector("image")?.getAttribute("href")).toBe(
+      "images/holidays/sukkot.jpg"
+    );
+  });
+
+  it("removes photo overlays along with their bars when a holiday is unchecked", () => {
+    document.getElementById("deselectallbtn")!.click();
+
+    expect(document.querySelectorAll("rect.bar-photo")).toHaveLength(0);
   });
 });
 

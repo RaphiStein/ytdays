@@ -195,6 +195,12 @@ var x = d3
 
 const dayWidth = x.bandwidth();
 const BAR_PADDING = 3;
+const BAR_HEIGHT = 20;
+
+/** Pattern ids go inside url(#...), so keep them to safe characters */
+function photoPatternId(yomTov: string): string {
+  return "photo-" + yomTov.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
 
 function draw() {
   // append the svg object to the body of the page
@@ -259,6 +265,21 @@ function draw() {
       "transform",
       "translate(" + constants.margin.left + "," + constants.margin.top + ")"
     );
+
+  const defs = svg_main.append("defs");
+  Object.keys(constants.holidayImages).forEach((yomTov) => {
+    defs
+      .append("pattern")
+      .attr("id", photoPatternId(yomTov))
+      .attr("patternUnits", "objectBoundingBox")
+      .attr("width", 1)
+      .attr("height", 1)
+      .append("image")
+      .attr("href", constants.holidayImages[yomTov])
+      .attr("width", dayWidth - BAR_PADDING * 2)
+      .attr("height", BAR_HEIGHT)
+      .attr("preserveAspectRatio", "xMidYMid slice");
+  });
 
   // svg
   //   .append('g')
@@ -379,7 +400,7 @@ function draw() {
     })
     // END ANIMATION
     .attr("width", (i) => dayWidth - BAR_PADDING * 2)
-    .attr("height", 20)
+    .attr("height", BAR_HEIGHT)
     .attr("rx", 4)
     .attr("ry", 4)
     .style("fill", (dayObj: any) => constants.colors[dayObj.yomTov] || "#222")
@@ -402,6 +423,25 @@ function draw() {
   // END TOOLTIP
 
   bars.exit().remove();
+
+  // Holiday photo over each bar; pointer-events off so the bar still gets the tooltip
+  yearGroup
+    .selectAll("rect.bar")
+    .filter((d: any) => !!constants.holidayImages[d.yomTov])
+    .each(function (d: any) {
+      const bar = d3.select(this as SVGRectElement);
+      d3.select((this as SVGRectElement).parentNode as SVGGElement)
+        .append("rect")
+        .attr("class", "bar-photo")
+        .attr("x", bar.attr("x"))
+        .attr("y", bar.attr("y"))
+        .attr("width", bar.attr("width"))
+        .attr("height", bar.attr("height"))
+        .attr("rx", bar.attr("rx"))
+        .attr("ry", bar.attr("ry"))
+        .attr("fill", "url(#" + photoPatternId(d.yomTov) + ")")
+        .attr("pointer-events", "none");
+    });
 
   /*
 const bars = yomTovObjects.selectAll()

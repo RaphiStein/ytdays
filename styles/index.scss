@@ -46,6 +46,11 @@ text {
   fill: #f4f1fa;
 }
 
+.bar-photo {
+  mix-blend-mode: luminosity;
+  opacity: 0.6;
+}
+
 .current-year-band {
   fill: #ffe082;
   fill-opacity: 0.35;
