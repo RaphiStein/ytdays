@@ -12,6 +12,11 @@ import { IInputYear, IStructuredD3Block } from "./types";
 import { hebcal_data } from "./hebcal-data";
 import { buildYearRange, loadYears, PreviousOrFollowing } from "./load-years";
 import { loadSavedSelection, saveSelection } from "./selection-storage";
+import {
+  animateChartChanges,
+  barKey,
+  snapshotChart,
+} from "./chart-animation";
 
 let originalData: IStructuredD3Block[][];
 let activeData: IStructuredD3Block[][] = [];
@@ -203,6 +208,12 @@ function photoPatternId(yomTov: string): string {
 }
 
 function draw() {
+  const previousChart = snapshotChart();
+  render();
+  animateChartChanges(previousChart);
+}
+
+function render() {
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
@@ -350,7 +361,7 @@ function draw() {
   // Each day
   const bars = yearGroup.selectAll(".bar-groups").data(
     (d) => d,
-    (d: any) => `${d.year}-${d.yomTov}-${d.subYomTov}`
+    (d: any) => barKey(d)
   );
 
   bars
@@ -432,6 +443,7 @@ function draw() {
       const bar = d3.select(this as SVGRectElement);
       d3.select((this as SVGRectElement).parentNode as SVGGElement)
         .append("rect")
+        .datum(d)
         .attr("class", "bar-photo")
         .attr("x", bar.attr("x"))
         .attr("y", bar.attr("y"))
