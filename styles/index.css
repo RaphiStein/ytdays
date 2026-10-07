@@ -27,12 +27,191 @@ text {
   font-family: Helvetica;
 }
 
-footer {
+/* App background: near-white grey with slowly drifting soft color stripes */
+html {
+  background: linear-gradient(180deg, #f7f8fa 0%, #eceef2 100%) fixed;
+  min-height: 100%;
+}
+
+body {
+  background: transparent;
+}
+
+body::before {
+  content: "";
   position: fixed;
-  bottom: 0px;
+  top: 0;
+  bottom: 0;
+  /* Extra width on the left so the drifting layer never exposes an edge */
+  left: -700px;
+  right: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    120deg,
+    rgba(129, 140, 248, 0) 0px,
+    rgba(129, 140, 248, 0.1) 100px,
+    rgba(129, 140, 248, 0) 200px,
+    rgba(244, 114, 182, 0.08) 300px,
+    rgba(244, 114, 182, 0) 400px,
+    rgba(45, 212, 191, 0.08) 500px,
+    rgba(45, 212, 191, 0) 600px
+  );
+  will-change: transform;
+  animation: background-drift 60s linear infinite;
+}
+
+/* One full stripe period: 600px along the 120deg gradient = 600 / sin(120deg) horizontally */
+@keyframes background-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(692.82px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+.app-navbar {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 0;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 12px rgba(15, 23, 42, 0.04);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  white-space: normal;
+}
+
+.brand-mark {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: 0.75rem;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #1f2937;
+}
+
+.brand-subtitle {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.app-panel {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.day-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.day-header svg {
+  display: block;
+}
+
+.weekend-column {
+  fill: #f4f1fa;
+}
+
+.bar-photo {
+  mix-blend-mode: luminosity;
+  opacity: 0.6;
+}
+
+.current-year-band {
+  fill: #ffe082;
+  fill-opacity: 0.35;
+}
+
+.current-year .year-label {
+  font-weight: bold;
+  fill: #b26a00;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.1em;
+  animation: loading-spin 0.75s linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 992px) {
+  #new-checkboxes-area {
+    position: sticky;
+    top: 1rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+#new-checkboxes-area .list-group-item {
+  padding: 0.5rem 1rem;
+}
+
+#new-checkboxes-area .custom-control-label {
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 1.5rem;
   font-style: oblique;
   font-variant: all-petite-caps;
-  padding: 1rem 3rem;
+  padding: 1rem 15px 2rem;
+  color: #6b7280;
 }
 
 /*# sourceMappingURL=index.css.map */

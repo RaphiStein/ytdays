@@ -19,6 +19,20 @@ export const constants: any = {
     Shavuot: "#7CF000",
     //"Shavuot": "#FFD700",
   },
+  /** Photo strips (5:1) drawn faintly over each holiday's bars. Paths are relative to index.html */
+  holidayImages: {
+    "Rosh Hashana": "images/holidays/rosh-hashana.jpg",
+    "Yom Kippur": "images/holidays/yom-kippur.jpg",
+    Sukkot: "images/holidays/sukkot.jpg",
+    SheminiAtzeret: "images/holidays/shemini-atzeret.jpg",
+    Chanukah: "images/holidays/chanukah.jpg",
+    "Tu BiShvat": "images/holidays/tu-bishvat.jpg",
+    Purim: "images/holidays/purim.jpg",
+    Pesach: "images/holidays/pesach.jpg",
+    "Lag BaOmer": "images/holidays/lag-baomer.jpg",
+    Shavuot: "images/holidays/shavuot.jpg",
+    "Tisha B'av": "images/holidays/tisha-bav.jpg",
+  },
 };
 
 /** These Yom Tovs are the ones checked by default on load */

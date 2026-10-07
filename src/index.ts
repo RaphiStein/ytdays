@@ -11,6 +11,7 @@ import { structureFromHebcal } from "./structure-from-hebcal";
 import { IInputYear, IStructuredD3Block } from "./types";
 import { hebcal_data } from "./hebcal-data";
 import { buildYearRange, loadYears, PreviousOrFollowing } from "./load-years";
+import { loadSavedSelection, saveSelection } from "./selection-storage";
 
 let originalData: IStructuredD3Block[][];
 let activeData: IStructuredD3Block[][] = [];
@@ -35,34 +36,87 @@ const AVAILABLE_YOM_TOVS: string[] = Array.from(
   )
 ).sort((yt1, yt2) => sortYomTovs(yt1) - sortYomTovs(yt2));
 
+const initiallyCheckedYomTovs: string[] =
+  loadSavedSelection(AVAILABLE_YOM_TOVS) || defaultCheckedYomTovs;
+
+const CURRENT_YEAR = String(new Date().getFullYear());
+
 const previousyearsbtn = document.getElementById("previousyearsbtn");
 if (previousyearsbtn) {
   previousyearsbtn.addEventListener("click", async () => {
-    loadAdditionalYears("previous");
+    loadAdditionalYears("previous", previousyearsbtn as HTMLButtonElement);
   });
 }
 const followingyearsbtn = document.getElementById("followingyearsbtn");
 if (followingyearsbtn) {
   followingyearsbtn.addEventListener("click", async () => {
-    loadAdditionalYears("following");
+    loadAdditionalYears("following", followingyearsbtn as HTMLButtonElement);
   });
 }
 
-async function loadAdditionalYears(previousOrFollowing: PreviousOrFollowing) {
-  const yearRange = buildYearRange(
-    previousOrFollowing,
-    previousOrFollowing === "previous"
-      ? Number(activeData[0][0].year)
-      : Number(activeData[activeData.length - 1][0].year)
-  );
-  const additionalYears = await loadYears(...yearRange);
-  if (previousOrFollowing === "previous") {
-    originalData = [...additionalYears, ...originalData];
-  } else {
-    originalData = [...originalData, ...additionalYears];
-  }
+function saveCheckedHolidays(): void {
+  const checked: string[] = [];
+  document
+    .querySelectorAll<HTMLInputElement>(".chkbox:checked")
+    .forEach((checkbox) => checked.push(checkbox.value));
+  saveSelection(checked);
+}
+
+function setAllHolidaysChecked(checked: boolean): void {
+  document
+    .querySelectorAll<HTMLInputElement>(".chkbox")
+    .forEach((checkbox) => (checkbox.checked = checked));
+  saveCheckedHolidays();
   filterHolidays();
   draw();
+}
+
+const selectallbtn = document.getElementById("selectallbtn");
+if (selectallbtn) {
+  selectallbtn.addEventListener("click", () => setAllHolidaysChecked(true));
+}
+const deselectallbtn = document.getElementById("deselectallbtn");
+if (deselectallbtn) {
+  deselectallbtn.addEventListener("click", () => setAllHolidaysChecked(false));
+}
+
+async function loadAdditionalYears(
+  previousOrFollowing: PreviousOrFollowing,
+  button: HTMLButtonElement
+) {
+  const errorArea = document.getElementById(previousOrFollowing + "yearserror");
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="loading-spinner"></span> Loading…';
+  if (errorArea) errorArea.hidden = true;
+
+  try {
+    // Uses originalData because activeData years are empty when no holidays are checked
+    const yearRange = buildYearRange(
+      previousOrFollowing,
+      previousOrFollowing === "previous"
+        ? Number(originalData[0][0].year)
+        : Number(originalData[originalData.length - 1][0].year)
+    );
+    const additionalYears = await loadYears(...yearRange);
+    if (previousOrFollowing === "previous") {
+      originalData = [...additionalYears, ...originalData];
+    } else {
+      originalData = [...originalData, ...additionalYears];
+    }
+    filterHolidays();
+    draw();
+  } catch (e) {
+    console.error("Failed to load additional years", e);
+    if (errorArea) {
+      errorArea.textContent =
+        "Couldn't load more years. Check your connection and try again.";
+      errorArea.hidden = false;
+    }
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalLabel;
+  }
 }
 
 console.log("Starting script..");
@@ -104,23 +158,31 @@ let checkBoxArea = d3
   .enter()
   .append("li")
   .attr("class", "list-group-item")
-  .append("label")
-  .attr("for", (d, i) => "chkbox_" + minifyYTName(d))
-  .text((d: string) => {
-    return d;
-  })
+  .append("div")
+  .attr("class", "custom-control custom-checkbox");
+
+checkBoxArea
   .append("input")
-  .attr("class", "chkbox ml-2")
+  .attr("class", "chkbox custom-control-input")
   .attr("value", (d: string) => {
     return d;
   })
   .attr("id", (d, i) => "chkbox_" + minifyYTName(d))
   .attr("type", "checkbox")
   .attr("checked", (ytName) => {
-    return defaultCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+    return initiallyCheckedYomTovs.indexOf(ytName) > -1 ? "true" : null;
+  });
+
+checkBoxArea
+  .append("label")
+  .attr("class", "custom-control-label")
+  .attr("for", (d, i) => "chkbox_" + minifyYTName(d))
+  .text((d: string) => {
+    return d;
   });
 
 d3.selectAll(".chkbox").on("change", () => {
+  saveCheckedHolidays();
   filterHolidays();
   draw();
 });
@@ -132,11 +194,19 @@ var x = d3
   .range([0, constants.width]);
 
 const dayWidth = x.bandwidth();
+const BAR_PADDING = 3;
+const BAR_HEIGHT = 20;
+
+/** Pattern ids go inside url(#...), so keep them to safe characters */
+function photoPatternId(yomTov: string): string {
+  return "photo-" + yomTov.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
 
 function draw() {
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
+  d3.select("#calendar-area > .day-header").remove();
   d3.select("#calendar-area > svg").remove();
   /* Tooltip Holder */
 
@@ -145,6 +215,34 @@ function draw() {
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+  // Days of the week column headers, in a sticky strip above the calendar
+  const LEFT_MARGIN = 25;
+  const DAY_HEADER_HEIGHT = 28;
+  d3.select("#calendar-area")
+    .append("div")
+    .attr("class", "day-header")
+    .append("svg")
+    .attr(
+      "width",
+      constants.width + constants.margin.left + constants.margin.right
+    )
+    .attr("height", DAY_HEADER_HEIGHT)
+    .append("g")
+    .attr("transform", "translate(" + constants.margin.left + ",0)")
+    .selectAll(".text")
+    .data(daysOfWeek)
+    .enter()
+    .append("text")
+    .text((i) => i)
+    .attr("x", (i: any) => {
+      const domainValue = x(i);
+      if (domainValue) return domainValue + LEFT_MARGIN;
+      return LEFT_MARGIN;
+    })
+    .attr("y", DAY_HEADER_HEIGHT - 8)
+    .attr("class", "year-text")
+    .style("fill", "black");
 
   let svg_main = d3.select("#calendar-area").append("svg");
 
@@ -168,6 +266,21 @@ function draw() {
       "translate(" + constants.margin.left + "," + constants.margin.top + ")"
     );
 
+  const defs = svg_main.append("defs");
+  Object.keys(constants.holidayImages).forEach((yomTov) => {
+    defs
+      .append("pattern")
+      .attr("id", photoPatternId(yomTov))
+      .attr("patternUnits", "objectBoundingBox")
+      .attr("width", 1)
+      .attr("height", 1)
+      .append("image")
+      .attr("href", constants.holidayImages[yomTov])
+      .attr("width", dayWidth - BAR_PADDING * 2)
+      .attr("height", BAR_HEIGHT)
+      .attr("preserveAspectRatio", "xMidYMid slice");
+  });
+
   // svg
   //   .append('g')
   //   .selectAll('.day-line')
@@ -182,22 +295,6 @@ function draw() {
   //   .style("stroke", "#222")
   //   .style("fill", "none");
 
-  // Days of the week column headers
-  const LEFT_MARGIN = 25;
-  svg
-    .selectAll(".text")
-    .data(daysOfWeek)
-    .enter()
-    .append("text")
-    .text((i) => i)
-    .attr("x", (i: any) => {
-      const domainValue = x(i);
-      if (domainValue) return domainValue + LEFT_MARGIN;
-      return LEFT_MARGIN;
-      //else throw Error('x(i) returned undefined!');
-    })
-    .attr("class", "year-text")
-    .style("fill", "black");
   //console.log("data", data);
   // Scale the range of the data in the domains
 
@@ -234,7 +331,21 @@ function draw() {
     })
     .attr("id", (d) =>
       atLeastOneYomTovIsSelected(d) ? "year-" + d[0].year : ""
-    ); // just take first element's year, to determine year of group
+    ) // just take first element's year, to determine year of group
+    .classed("current-year", (d) =>
+      atLeastOneYomTovIsSelected(d) ? d[0].year === CURRENT_YEAR : false
+    );
+
+  yearGroup
+    .filter(".current-year")
+    .append("rect")
+    .attr("class", "current-year-band")
+    .attr("x", -70)
+    .attr("y", -3)
+    .attr("rx", 6)
+    .attr("ry", 6)
+    .attr("width", constants.width + 70)
+    .attr("height", (d) => calculateNumberOfRows(d) * constants.rowHeight + 1);
 
   // Each day
   const bars = yearGroup.selectAll(".bar-groups").data(
@@ -282,14 +393,16 @@ function draw() {
     .transition()
     .duration(500)*/
     .attr("x", (dayObj: any) => {
-      return daysOfWeek.indexOf(dayObj.day) * dayWidth;
+      return daysOfWeek.indexOf(dayObj.day) * dayWidth + BAR_PADDING;
     })
     .attr("y", (d, i, j: any) => {
       return j[i].attributes["row-number-wrt-year"].value * constants.rowHeight;
     })
     // END ANIMATION
-    .attr("width", (i) => dayWidth)
-    .attr("height", 20)
+    .attr("width", (i) => dayWidth - BAR_PADDING * 2)
+    .attr("height", BAR_HEIGHT)
+    .attr("rx", 4)
+    .attr("ry", 4)
     .style("fill", (dayObj: any) => constants.colors[dayObj.yomTov] || "#222")
     // TOOLTIP START
     .on("mouseover", function (d: any) {
@@ -311,6 +424,25 @@ function draw() {
 
   bars.exit().remove();
 
+  // Holiday photo over each bar; pointer-events off so the bar still gets the tooltip
+  yearGroup
+    .selectAll("rect.bar")
+    .filter((d: any) => !!constants.holidayImages[d.yomTov])
+    .each(function (d: any) {
+      const bar = d3.select(this as SVGRectElement);
+      d3.select((this as SVGRectElement).parentNode as SVGGElement)
+        .append("rect")
+        .attr("class", "bar-photo")
+        .attr("x", bar.attr("x"))
+        .attr("y", bar.attr("y"))
+        .attr("width", bar.attr("width"))
+        .attr("height", bar.attr("height"))
+        .attr("rx", bar.attr("rx"))
+        .attr("ry", bar.attr("ry"))
+        .attr("fill", "url(#" + photoPatternId(d.yomTov) + ")")
+        .attr("pointer-events", "none");
+    });
+
   /*
 const bars = yomTovObjects.selectAll()
   .data((ytObj) => {
@@ -330,6 +462,7 @@ const bars = yomTovObjects.selectAll()
 
   yearGroup
     .append("text")
+    .attr("class", "year-label")
     .attr("x", "-60")
     .attr("y", (d) => {
       var numberOfRows = calculateNumberOfRows(d);
@@ -348,6 +481,17 @@ const bars = yomTovObjects.selectAll()
     (originalData.length - 1) * constants.interyearMargin + // all the spaces between the rows
     constants.margin.bottom * 2;
   svg_main.attr("height", calculatedFinalHeight);
+
+  // Shade the weekend columns behind everything else
+  ["Sunday", "Saturday"].forEach((day) => {
+    svg
+      .insert("rect", ":first-child")
+      .attr("class", "weekend-column")
+      .attr("x", daysOfWeek.indexOf(day) * dayWidth)
+      .attr("y", 0)
+      .attr("width", dayWidth)
+      .attr("height", calculatedFinalHeight);
+  });
 
   // Draw the day swimlanes
   svg
