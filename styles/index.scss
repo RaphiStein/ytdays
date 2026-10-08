@@ -166,6 +166,19 @@ body::before {
   fill-opacity: 0.35;
 }
 
+/* Chart animations scale bars around their own centre and grow the band from its top */
+.bar,
+.bar-photo,
+.bar-ghost,
+.current-year-band {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.current-year-band {
+  transform-origin: top;
+}
+
 .current-year .year-label {
   font-weight: bold;
   fill: #b26a00;

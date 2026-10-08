@@ -12,6 +12,11 @@ import { IInputYear, IStructuredD3Block } from "./types";
 import { hebcal_data } from "./hebcal-data";
 import { buildYearRange, loadYears, PreviousOrFollowing } from "./load-years";
 import { loadSavedSelection, saveSelection } from "./selection-storage";
+import {
+  animateChartChanges,
+  barKey,
+  snapshotChart,
+} from "./chart-animation";
 
 let originalData: IStructuredD3Block[][];
 let activeData: IStructuredD3Block[][] = [];
@@ -54,6 +59,64 @@ if (followingyearsbtn) {
   });
 }
 
+const YEARS_PER_STEP = 3;
+
+/** Years hidden from each end, kept in chronological order so loading them again needs no fetch */
+let hiddenEarlierYears: IStructuredD3Block[][] = [];
+let hiddenLaterYears: IStructuredD3Block[][] = [];
+
+const hideearliestyearsbtn = document.getElementById(
+  "hideearliestyearsbtn"
+) as HTMLButtonElement | null;
+if (hideearliestyearsbtn) {
+  hideearliestyearsbtn.addEventListener("click", () => hideYears("previous"));
+}
+const hidelatestyearsbtn = document.getElementById(
+  "hidelatestyearsbtn"
+) as HTMLButtonElement | null;
+if (hidelatestyearsbtn) {
+  hidelatestyearsbtn.addEventListener("click", () => hideYears("following"));
+}
+
+function updateHideButtons(): void {
+  const canHide = originalData.length > YEARS_PER_STEP;
+  if (hideearliestyearsbtn) hideearliestyearsbtn.disabled = !canHide;
+  if (hidelatestyearsbtn) hidelatestyearsbtn.disabled = !canHide;
+}
+
+function hideYears(previousOrFollowing: PreviousOrFollowing): void {
+  if (originalData.length <= YEARS_PER_STEP) return;
+  if (previousOrFollowing === "previous") {
+    hiddenEarlierYears = [
+      ...hiddenEarlierYears,
+      ...originalData.slice(0, YEARS_PER_STEP),
+    ];
+    originalData = originalData.slice(YEARS_PER_STEP);
+  } else {
+    hiddenLaterYears = [
+      ...originalData.slice(-YEARS_PER_STEP),
+      ...hiddenLaterYears,
+    ];
+    originalData = originalData.slice(0, -YEARS_PER_STEP);
+  }
+  filterHolidays();
+  draw();
+}
+
+/** Pops up to YEARS_PER_STEP previously hidden years adjacent to the displayed range */
+function restoreHiddenYears(
+  previousOrFollowing: PreviousOrFollowing
+): IStructuredD3Block[][] {
+  if (previousOrFollowing === "previous") {
+    const restored = hiddenEarlierYears.slice(-YEARS_PER_STEP);
+    hiddenEarlierYears = hiddenEarlierYears.slice(0, -YEARS_PER_STEP);
+    return restored;
+  }
+  const restored = hiddenLaterYears.slice(0, YEARS_PER_STEP);
+  hiddenLaterYears = hiddenLaterYears.slice(YEARS_PER_STEP);
+  return restored;
+}
+
 function saveCheckedHolidays(): void {
   const checked: string[] = [];
   document
@@ -91,14 +154,17 @@ async function loadAdditionalYears(
   if (errorArea) errorArea.hidden = true;
 
   try {
-    // Uses originalData because activeData years are empty when no holidays are checked
-    const yearRange = buildYearRange(
-      previousOrFollowing,
-      previousOrFollowing === "previous"
-        ? Number(originalData[0][0].year)
-        : Number(originalData[originalData.length - 1][0].year)
-    );
-    const additionalYears = await loadYears(...yearRange);
+    let additionalYears = restoreHiddenYears(previousOrFollowing);
+    if (!additionalYears.length) {
+      // Uses originalData because activeData years are empty when no holidays are checked
+      const yearRange = buildYearRange(
+        previousOrFollowing,
+        previousOrFollowing === "previous"
+          ? Number(originalData[0][0].year)
+          : Number(originalData[originalData.length - 1][0].year)
+      );
+      additionalYears = await loadYears(...yearRange);
+    }
     if (previousOrFollowing === "previous") {
       originalData = [...additionalYears, ...originalData];
     } else {
@@ -203,6 +269,13 @@ function photoPatternId(yomTov: string): string {
 }
 
 function draw() {
+  const previousChart = snapshotChart();
+  render();
+  animateChartChanges(previousChart);
+  updateHideButtons();
+}
+
+function render() {
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
   // moves the 'group' element to the top left margin
@@ -350,7 +423,7 @@ function draw() {
   // Each day
   const bars = yearGroup.selectAll(".bar-groups").data(
     (d) => d,
-    (d: any) => `${d.year}-${d.yomTov}-${d.subYomTov}`
+    (d: any) => barKey(d)
   );
 
   bars
@@ -432,6 +505,7 @@ function draw() {
       const bar = d3.select(this as SVGRectElement);
       d3.select((this as SVGRectElement).parentNode as SVGGElement)
         .append("rect")
+        .datum(d)
         .attr("class", "bar-photo")
         .attr("x", bar.attr("x"))
         .attr("y", bar.attr("y"))

@@ -9,9 +9,11 @@ const APP_SHELL = `
       <ul class="list-group"></ul>
     </div>
     <button id="previousyearsbtn" class="btn">Load 3 previous years</button>
+    <button id="hideearliestyearsbtn" class="btn">Hide earliest 3 years</button>
     <small id="previousyearserror" hidden></small>
     <div id="calendar-area"></div>
     <button id="followingyearsbtn" class="btn">Load next 3 years</button>
+    <button id="hidelatestyearsbtn" class="btn">Hide latest 3 years</button>
     <small id="followingyearserror" hidden></small>
   </div>
 `;
