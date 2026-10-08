@@ -25,10 +25,17 @@ interface BarSnapshot {
   photoFill: string | null;
 }
 
+interface LabelSnapshot {
+  x: number;
+  /** y relative to its year group */
+  y: number;
+  text: string;
+}
+
 export interface ChartSnapshot {
   height: number;
   groupY: Map<string, number>;
-  labelY: Map<string, number>;
+  labels: Map<string, LabelSnapshot>;
   bandHeight: Map<string, number>;
   bars: Map<string, BarSnapshot>;
 }
@@ -75,7 +82,7 @@ export function snapshotChart(): ChartSnapshot | null {
   const snapshot: ChartSnapshot = {
     height: num(svg, "height"),
     groupY: new Map(),
-    labelY: new Map(),
+    labels: new Map(),
     bandHeight: new Map(),
     bars: new Map(),
   };
@@ -85,7 +92,13 @@ export function snapshotChart(): ChartSnapshot | null {
     snapshot.groupY.set(group.id, groupY);
 
     const label = group.querySelector("text.year-label");
-    if (label) snapshot.labelY.set(group.id, num(label, "y"));
+    if (label) {
+      snapshot.labels.set(group.id, {
+        x: num(label, "x"),
+        y: num(label, "y"),
+        text: label.textContent || "",
+      });
+    }
     const band = group.querySelector("rect.current-year-band");
     if (band) snapshot.bandHeight.set(group.id, num(band, "height"));
 
@@ -198,9 +211,9 @@ function animateWithinGroup(group: SVGGElement, previous: ChartSnapshot) {
     });
 
   const label = group.querySelector("text.year-label");
-  const oldLabelY = previous.labelY.get(group.id);
-  if (label && oldLabelY !== undefined) {
-    const dy = oldLabelY - num(label, "y");
+  const oldLabel = previous.labels.get(group.id);
+  if (label && oldLabel) {
+    const dy = oldLabel.y - num(label, "y");
     if (dy) {
       label.animate(
         [{ transform: `translate(0px, ${dy}px)` }, { transform: "none" }],
@@ -237,7 +250,11 @@ function fadeOutRemovedBars(
   const removed = Array.from(previous.bars.entries()).filter(
     ([key]) => !present.has(key)
   );
-  if (!removed.length) return;
+  const presentGroups = new Set(groups.map((group) => group.id));
+  const removedLabels = Array.from(previous.labels.entries()).filter(
+    ([groupId]) => !presentGroups.has(groupId)
+  );
+  if (!removed.length && !removedLabels.length) return;
 
   const layer = document.createElementNS(SVG_NS, "g");
   layer.setAttribute("class", "ghost-layer");
@@ -267,6 +284,21 @@ function fadeOutRemovedBars(
   removed.forEach(([, bar]) => {
     addGhost(bar, "bar-ghost", bar.fill);
     if (bar.photoFill) addGhost(bar, "bar-ghost bar-photo", bar.photoFill);
+  });
+
+  removedLabels.forEach(([groupId, label]) => {
+    const text = document.createElementNS(SVG_NS, "text");
+    text.setAttribute("class", "year-label");
+    text.setAttribute("x", String(label.x));
+    text.setAttribute("y", String((previous.groupY.get(groupId) || 0) + label.y));
+    text.textContent = label.text;
+    layer.appendChild(text);
+    animations.push(
+      text.animate(
+        [{ opacity: 0 }],
+        timing({ duration: DURATION * 0.75, fill: "forwards" })
+      )
+    );
   });
 
   Promise.all(animations.map((animation) => animation.finished))

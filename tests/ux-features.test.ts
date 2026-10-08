@@ -180,3 +180,68 @@ describe("loading more years", () => {
     ]);
   });
 });
+
+describe("hiding years", () => {
+  it("hides the earliest 3 years", () => {
+    loadApp();
+    document.getElementById("hideearliestyearsbtn")!.click();
+
+    const ids = getYearGroupIds();
+    expect(ids).toHaveLength(11);
+    expect(ids[0]).toBe("year-2020");
+    expect(ids[ids.length - 1]).toBe("year-2030");
+  });
+
+  it("hides the latest 3 years", () => {
+    loadApp();
+    document.getElementById("hidelatestyearsbtn")!.click();
+
+    const ids = getYearGroupIds();
+    expect(ids).toHaveLength(11);
+    expect(ids[0]).toBe("year-2017");
+    expect(ids[ids.length - 1]).toBe("year-2027");
+  });
+
+  it("brings hidden years back without refetching them", async () => {
+    (window as any).fetch = jest.fn();
+
+    loadApp();
+    document.getElementById("hideearliestyearsbtn")!.click();
+    document.getElementById("hideearliestyearsbtn")!.click();
+    document.getElementById("hidelatestyearsbtn")!.click();
+
+    document.getElementById("previousyearsbtn")!.click();
+    document.getElementById("followingyearsbtn")!.click();
+    for (let i = 0; i < 5; i++) await flushPromises();
+
+    const ids = getYearGroupIds();
+    expect(ids[0]).toBe("year-2020");
+    expect(ids[ids.length - 1]).toBe("year-2030");
+    expect(ids).toHaveLength(11);
+    expect((window as any).fetch).not.toHaveBeenCalled();
+  });
+
+  it("disables both hide buttons once 3 or fewer years remain", () => {
+    loadApp();
+    const earliest = document.getElementById(
+      "hideearliestyearsbtn"
+    ) as HTMLButtonElement;
+    const latest = document.getElementById(
+      "hidelatestyearsbtn"
+    ) as HTMLButtonElement;
+
+    earliest.click();
+    earliest.click();
+    latest.click();
+    expect(getYearGroupIds()).toHaveLength(5);
+    expect(earliest.disabled).toBe(false);
+
+    latest.click();
+    expect(getYearGroupIds()).toHaveLength(2);
+    expect(earliest.disabled).toBe(true);
+    expect(latest.disabled).toBe(true);
+
+    latest.click();
+    expect(getYearGroupIds()).toHaveLength(2);
+  });
+});
